@@ -82,7 +82,7 @@ namespace BetterJunimos.Abilities {
                     location.objects.Remove(nextPos);
 
                     // calculate the forage experience from this harvest
-                    if (BetterJunimos.Config.JunimoPayment.GiveExperience) {
+                    if (BetterJunimos.Config.JunimoImprovements.GiveExperience) {
                         try {
                             Game1.player.gainExperience(2, 7);
                         } catch (Exception e) {

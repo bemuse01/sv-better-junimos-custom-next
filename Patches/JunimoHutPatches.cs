@@ -32,11 +32,6 @@ namespace BetterJunimos.Patches {
 
         public static bool Prefix(JunimoHut __instance, ref bool __result) {
             if (!Context.IsMainPlayer) return true;
-            // Prevent unnecessary searching when unpaid
-            if (BetterJunimos.Config.JunimoPayment.WorkForWages && !Util.Payments.WereJunimosPaidToday) {
-                __instance.lastKnownCropLocation = Point.Zero;
-                return false;
-            }
 
             __result = SearchAroundHut(__instance);
             return false;
@@ -264,13 +259,21 @@ namespace BetterJunimos.Patches {
 
     /* dayUpdate
      *
-     * To allow more junimos, allow working
+     * To allow more junimos, allow working, and support Raisins in Winter
      */
     [HarmonyPriority(Priority.VeryHigh)]
     internal class ReplaceJunimoHutdayUpdate {
         public static void Postfix(JunimoHut __instance, int dayOfMonth) {
             __instance.shouldSendOutJunimos.Value = true;
             __instance.cropHarvestRadius = Util.CurrentWorkingRadius;
+            if (Game1.IsWinter && BetterJunimos.Config.JunimoImprovements.CanWorkInWinter) {
+                if (__instance.raisinDays.Value > 0) {
+                    __instance.raisinDays.Value--;
+                }
+                if (__instance.raisinDays.Value == 0) {
+                    Util.TryConsumeRaisins(__instance, showMessage: false);
+                }
+            }
             PatchSearchAroundHut.InvalidateCache();
             JunimoSpawnHelper.ResetPacing();
         }

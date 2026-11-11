@@ -28,7 +28,7 @@ namespace BetterJunimos.Abilities {
 
         public bool PerformAction(GameLocation location, Vector2 pos, JunimoHarvester junimo, Guid guid) {
             // calculate the experience from this harvest
-            if (BetterJunimos.Config.JunimoPayment.GiveExperience) {
+            if (BetterJunimos.Config.JunimoImprovements.GiveExperience) {
                 try {
                     if (location.terrainFeatures.ContainsKey(pos) && location.terrainFeatures[pos] is HoeDirt { crop: { } } hd) {
                         Game1.player.gainExperience(0, Util.ExperienceForCrop(hd.crop));

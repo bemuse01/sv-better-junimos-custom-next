@@ -42,7 +42,7 @@ namespace BetterJunimos {
         }
 
         public bool GetWereJunimosPaidToday() {
-            return Util.Payments.WereJunimosPaidToday;
+            return true;
         }
 
         public void ShowPerfectionTracker() {

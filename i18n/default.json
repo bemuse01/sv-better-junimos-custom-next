@@ -1,7 +1,5 @@
 {
-  "msg.no-work-until-paid": "Junimos will not work until they are paid",
-  "msg.happy-with-payment": "Junimos are happy with their payment!",
-  "msg.need-more-payment": "Junimos need more payment",
+  "msg.happy-with-raisins": "The Junimos are delighted with their raisins and are working faster!",
   "cfg.hut-settings": "Hut Settings",
   "cfg.max-junimos": "Max Junimos",
   "cfg.max-radius": "Max Radius",
@@ -30,6 +28,8 @@
   "cfg.ability.harvest-bushes.tooltip": "Allow Junimos to harvest tea bushes and berry bushes",
   "cfg.ability.harvest-forage-crops": "Harvest Forage Crops",
   "cfg.ability.harvest-forage-crops.tooltip": "Allow Junimos to harvest wild seed and forage crops",
+  "cfg.give-experience": "Harvesting gives experience",
+  "cfg.give-experience.tooltip": "XP from Junimo harvesting adds to Farming and Foraging skills",
   "cfg.harvest-planting-options": "Harvest & Planting Options",
   "cfg.avoid-harvesting-flowers": "Avoid Harvesting Flowers",
   "cfg.avoid-harvesting-giant-crops": "Avoid Harvesting Giant Crops",
@@ -40,16 +40,7 @@
   "cfg.avoid-planting-out-of-season": "Avoid Planting Out Of Season",
   "cfg.plant-mixed-seeds": "Plant Mixed Seeds",
   "cfg.plant-mixed-seeds.tooltip": "Allow Junimos to plant Mixed Seeds and Mixed Flower Seeds",
-  "cfg.payment": "Payment",
-  "cfg.work-for-wages": "Work For Wages",
-  "cfg.work-for-wages.tooltip": "Junimos need a daily payment in their hut before they'll work; set the amounts below.",
-  "cfg.foraged-items": "Foraged items",
-  "cfg.flowers": "Flowers",
-  "cfg.fruit": "Fruit",
-  "cfg.wine": "Wine",
   "cfg.other": "Other",
-  "cfg.give-experience": "Harvesting gives experience",
-  "cfg.give-experience.tooltip": "XP from Junimo harvesting adds to Farming and Foraging skills",
   "cfg.rainy-spirit-factor": "Rainy spirit factor",
   "cfg.rainy-spirit-factor.tooltip": "Rainy Junimo spirit factor",
   "cfg.always-have-umbrellas": "Always have umbrellas",
@@ -61,7 +52,5 @@
   "debug.available-actions-for-greenhouse": "Available actions for greenhouse",
   "debug.actions-logged": "Available actions logged to the console",
   "debug.in-cooldown": "[cooling down]",
-  "debug.required-item-unavailable": "[required item unavailable]",
-  "wizard.edit-options": "To change options edit config.json in the Better Junimos folder.",
-  "wizard.install-gmcm": "For easy configuration install Generic Mod Config Menu."
+  "debug.required-item-unavailable": "[required item unavailable]"
 }

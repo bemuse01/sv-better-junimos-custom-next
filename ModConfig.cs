@@ -31,28 +31,13 @@ namespace BetterJunimos {
             public bool CanWorkInWinter { get; set; } = true;
             public bool CanWorkInEvenings { get; set; } = true;
             public bool CanWorkInGreenhouse { get; set; } = true;
+            public bool GiveExperience { get; set; } = false;
             public bool AvoidHarvestingFlowers { get; set; } = true;
             public bool AvoidHarvestingGiants { get; set; } = true;
             public bool HarvestEverythingOn28th { get; set; } = true;
             public bool AvoidPlantingCoffee { get; set; } = true;
             public bool AvoidPlantingOutOfSeason { get; set; } = true;
             public bool PlantMixedSeeds { get; set; } = false;
-        }
-
-        public JunimoPayments JunimoPayment { get; set; } = new();
-
-        internal class JunimoPayments {
-            public bool WorkForWages { get; set; } = true;
-            public PaymentAmount DailyWage { get; set; } = new();
-
-            internal class PaymentAmount {
-                public int ForagedItems { get; set; } = 1;
-                public int Flowers { get; set; } = 0;
-                public int Fruit { get; set; } = 0;
-                public int Wine { get; set; } = 0;
-            }
-
-            public bool GiveExperience { get; set; } = false;
         }
 
         public FunSettings FunChanges { get; set; } = new();

@@ -14,7 +14,6 @@ using SObject = StardewValley.Object;
 
 namespace BetterJunimos.Utils {
     public class Util {
-        private const int UnpaidRadius = 3;
         private const int UnreachableCooldownTicks = 300;
         private const int PathfindNodeLimit = 2500;
         private const int MaxPathfindAttempts = 10;
@@ -25,14 +24,8 @@ namespace BetterJunimos.Utils {
         private const int GemCategory = -2;
         private const int MineralCategory = -12;
 
-        public const int ForageCategory = -81;
-        public const int FlowerCategory = -80;
-        public const int FruitCategory = -79;
-        public const int WineCategory = -26;
-
         internal static IReflectionHelper Reflection;
         internal static JunimoAbilities Abilities;
-        internal static JunimoPayments Payments;
         internal static JunimoProgression Progression;
         internal static JunimoGreenhouse Greenhouse;
 
@@ -55,12 +48,20 @@ namespace BetterJunimos.Utils {
             return Game1.locations;
         }
 
-        public static int CurrentWorkingRadius {
-            get {
-                if (!BetterJunimos.Config.JunimoPayment.WorkForWages) return BetterJunimos.Config.JunimoHuts.MaxRadius;
-                if (Payments.WereJunimosPaidToday) return BetterJunimos.Config.JunimoHuts.MaxRadius;
-                return UnpaidRadius;
+        public static int CurrentWorkingRadius => BetterJunimos.Config.JunimoHuts.MaxRadius;
+
+        public static bool TryConsumeRaisins(JunimoHut hut, bool showMessage = true) {
+            if (hut is null || hut.raisinDays.Value > 0) return false;
+            Chest chest = hut.GetOutputChest();
+            if (chest != null && chest.Items.CountId("(O)Raisins") > 0) {
+                hut.raisinDays.Value += 7;
+                chest.Items.ReduceId("(O)Raisins", 1);
+                if (showMessage) {
+                    SendMessage(BetterJunimos.SHelper.Translation.Get("msg.happy-with-raisins"));
+                }
+                return true;
             }
+            return false;
         }
 
         public static List<JunimoHut> GetAllHuts() {

@@ -84,7 +84,8 @@ namespace BetterJunimos.Patches {
                 } else {
                     // succeeded, invalidate hut scan cache and shake
                     PatchSearchAroundHut.InvalidateCache();
-                    ___harvestTimer = junimoAbility is HarvestCropsAbility ? 2000 : 300;
+                    int baseActionTimer = hut.raisinDays.Value > 0 ? 200 : 300;
+                    ___harvestTimer = junimoAbility is HarvestCropsAbility ? 2000 : baseActionTimer;
                 }
             } else {
                 // nothing to do on this tile, immediately find next work
@@ -98,8 +99,16 @@ namespace BetterJunimos.Patches {
     }
 
     // update
-    // Animate & handle action timer 
+    // Animate, apply Raisins movement speed boost, & handle action timer
     public class PatchJunimoShake {
+        public static void Prefix(JunimoHarvester __instance, bool ___destroy) {
+            if (!Context.IsMainPlayer) return;
+            bool boostSpeed = !___destroy &&
+                              __instance.controller?.pathToEndPoint is { Count: > 1 } &&
+                              __instance.home?.raisinDays.Value > 0;
+            __instance.speed = boostSpeed ? 4 : 3;
+        }
+
         public static void Postfix(JunimoHarvester __instance, ref int ___harvestTimer, bool ___destroy) {
             if (!Context.IsMainPlayer) return;
 
@@ -112,10 +121,8 @@ namespace BetterJunimos.Patches {
                 __instance.shake(50);
             } else if (!___destroy && ___harvestTimer <= 0 && __instance.controller == null) {
                 // Recover automatically if PathFindController timed out or was cleared
-                if (!(BetterJunimos.Config.JunimoPayment.WorkForWages && !Util.Payments.WereJunimosPaidToday)) {
-                    if (Game1.ticks % 30 == 0) {
-                        __instance.pathfindToNewCrop();
-                    }
+                if (Game1.ticks % 30 == 0) {
+                    __instance.pathfindToNewCrop();
                 }
             }
         }
@@ -214,17 +221,6 @@ namespace BetterJunimos.Patches {
                 // bedtime, all Junimos return to huts and/or despawn
                 if (__instance.controller != null) return false;
                 SendJunimoHome(__instance, hut);
-                return false;
-            }
-
-            // Prevent working when not paid
-            if (BetterJunimos.Config.JunimoPayment.WorkForWages && !Util.Payments.WereJunimosPaidToday) {
-                if (Game1.random.NextDouble() < 0.02) {
-                    __instance.pathfindToRandomSpotAroundHut();
-                } else {
-                    // go on strike
-                    ___netAnimationEvent.Fire(7);
-                }
                 return false;
             }
 

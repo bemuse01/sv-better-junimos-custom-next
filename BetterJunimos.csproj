@@ -4,16 +4,11 @@
     <EnableModDeploy>false</EnableModDeploy>
     <AssemblyName>BetterJunimos</AssemblyName>
     <RootNamespace>BetterJunimos</RootNamespace>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
     <LangVersion>latest</LangVersion>
     <TargetFramework>net6.0</TargetFramework>
     <EnableHarmony>true</EnableHarmony>
   </PropertyGroup>
-
-  <ItemGroup>
-    <!-- bundle the Content Patcher pack with the mod, so it ends up in the release zip -->
-    <ContentPacks Include="[CP] Better Junimos Config Wizard" Version="$(Version)" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />

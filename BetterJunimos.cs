@@ -21,7 +21,6 @@ namespace BetterJunimos {
         internal static Maps CropMaps;
 
         private IGenericModConfigMenuApi configMenu;
-        internal static IContentPatcherAPI ContentPatcherAPI;
 
         /// <summary>The mod entry point, called after the mod is first loaded.</summary>
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
@@ -35,14 +34,12 @@ namespace BetterJunimos {
             Util.Reflection = helper.Reflection;
 
             Util.Abilities = new JunimoAbilities(Config.JunimoAbilities, Monitor);
-            Util.Payments = new JunimoPayments(Config.JunimoPayment);
             Util.Progression = new JunimoProgression(ModManifest, Monitor, Helper);
             Util.Greenhouse = new JunimoGreenhouse(ModManifest, Monitor, Helper);
 
             helper.Events.Content.AssetRequested += BuildingEditor.OnAssetRequested;
             helper.Events.Content.AssetRequested += JunimoEditor.OnAssetRequested;
 
-            helper.Events.GameLoop.OneSecondUpdateTicked += Util.Progression.ConfigureFromWizard;
             helper.Events.Display.MenuChanged += OnMenuChanged;
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
@@ -156,7 +153,7 @@ namespace BetterJunimos {
                 }
             }
 
-            CheckHutsForWages();
+            RefreshHutsAndRaisins(showRaisinMessage: true);
             JunimoAbilities.ResetCooldowns();
             // chest contents changed, the cached work search may be out of date
             Patches.PatchSearchAroundHut.InvalidateCache();
@@ -166,11 +163,6 @@ namespace BetterJunimos {
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
         void OnDayStarted(object sender, DayStartedEventArgs e) {
-            if (Config.JunimoPayment.WorkForWages) {
-                Util.Payments.JunimoPaymentsToday.Clear();
-                Util.Payments.WereJunimosPaidToday = false;
-            }
-
             var huts = Util.GetAllHuts();
 
             // tag each hut chest so later we can tell whether a GrabMenu close is for a Junimo chest or some other chest 
@@ -179,7 +171,10 @@ namespace BetterJunimos {
             }
 
             if (huts.Any()) {
-                CheckHutsForWages();
+                RefreshHutsAndRaisins(showRaisinMessage: false);
+                if (huts.Any(h => h.raisinDays.Value > 0)) {
+                    Util.SendMessage(Helper.Translation.Get("msg.happy-with-raisins"));
+                }
                 JunimoAbilities.ResetCooldowns();
             }
 
@@ -204,30 +199,21 @@ namespace BetterJunimos {
             SaveConfig();
         }
 
-        private void CheckHutsForWages() {
-            var alreadyPaid = Util.Payments.WereJunimosPaidToday;
-
+        private static void RefreshHutsAndRaisins(bool showRaisinMessage) {
             var junimoHuts = Util.GetAllHuts();
             if (!junimoHuts.Any()) return;
 
+            bool consumedAnyRaisins = false;
             foreach (var hut in junimoHuts) {
                 var hutId = Util.GetHutIdFromHut(hut);
-
-                if (Config.JunimoPayment.WorkForWages) {
-                    CheckForWages(hut);
+                if (Util.TryConsumeRaisins(hut, showMessage: false)) {
+                    consumedAnyRaisins = true;
                 }
-
                 Util.Abilities.UpdateHutItems(hutId, hut);
             }
 
-            if (!Config.JunimoPayment.WorkForWages) return;
-            switch (Util.Payments.WereJunimosPaidToday) {
-                case false:
-                    Util.SendMessage(Helper.Translation.Get("msg.no-work-until-paid") + " " + Util.Payments.PaymentOutstanding());
-                    break;
-                case true when !alreadyPaid:
-                    Util.SendMessage(Helper.Translation.Get("msg.happy-with-payment"));
-                    break;
+            if (showRaisinMessage && consumedAnyRaisins) {
+                Util.SendMessage(SHelper.Translation.Get("msg.happy-with-raisins"));
             }
         }
 
@@ -263,8 +249,6 @@ namespace BetterJunimos {
         }
 
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e) {
-            ContentPatcherAPI = Helper.ModRegistry.GetApi<IContentPatcherAPI>("Pathoschild.ContentPatcher");
-
             // only register after the game is launched so we can query the object registry
             Util.Abilities.RegisterDefaultAbilities();
 
@@ -272,9 +256,6 @@ namespace BetterJunimos {
 
             // write the config file again to populate JunimoAbilities with registered abilities
             SaveConfig();
-
-            // register GMCM token
-            Util.Progression.SetupHutsToken();
         }
 
         private static bool GetAbilityEnabled(string abilityName) {
@@ -403,6 +384,12 @@ namespace BetterJunimos {
                 "cfg.ability.harvest-forage-crops",
                 "cfg.ability.harvest-forage-crops.tooltip"
             );
+            AddHostBoolOption(
+                () => Config.JunimoImprovements.GiveExperience,
+                val => Config.JunimoImprovements.GiveExperience = val,
+                "cfg.give-experience",
+                "cfg.give-experience.tooltip"
+            );
 
             // 3. Harvest & Planting Detailed Options (Separated Category)
             configMenu.AddSectionTitle(ModManifest,
@@ -443,49 +430,7 @@ namespace BetterJunimos {
                 "cfg.plant-mixed-seeds.tooltip"
             );
 
-            // 4. Payment
-            configMenu.AddSectionTitle(ModManifest,
-                () => Helper.Translation.Get("cfg.payment"),
-                () => "");
-            AddBoolOption(
-                () => Config.JunimoPayment.WorkForWages,
-                val => Config.JunimoPayment.WorkForWages = val,
-                "cfg.work-for-wages",
-                "cfg.work-for-wages.tooltip"
-            );
-            AddNumberOption(
-                () => Config.JunimoPayment.DailyWage.ForagedItems,
-                val => Config.JunimoPayment.DailyWage.ForagedItems = val,
-                "cfg.foraged-items",
-                0, 20
-            );
-            AddNumberOption(
-                () => Config.JunimoPayment.DailyWage.Flowers,
-                val => Config.JunimoPayment.DailyWage.Flowers = val,
-                "cfg.flowers",
-                0, 20
-            );
-            AddNumberOption(
-                () => Config.JunimoPayment.DailyWage.Fruit,
-                val => Config.JunimoPayment.DailyWage.Fruit = val,
-                "cfg.fruit",
-                0, 20
-            );
-            AddNumberOption(
-                () => Config.JunimoPayment.DailyWage.Wine,
-                val => Config.JunimoPayment.DailyWage.Wine = val,
-                "cfg.wine",
-                0, 20
-            );
-
-            AddHostBoolOption(
-                () => Config.JunimoPayment.GiveExperience,
-                val => Config.JunimoPayment.GiveExperience = val,
-                "cfg.give-experience",
-                "cfg.give-experience.tooltip"
-            );
-
-            // 5. Other
+            // 4. Other
             configMenu.AddSectionTitle(ModManifest,
                 () => Helper.Translation.Get("cfg.other"),
                 () => "");
@@ -554,14 +499,6 @@ namespace BetterJunimos {
         private static void AllowJunimoHutPurchasing() {
             if (Config.JunimoHuts.AvailableImmediately || (Config.JunimoHuts.AvailableAfterCommunityCenterComplete && Game1.MasterPlayer.mailReceived.Contains("ccIsComplete"))) {
                 Game1.player.hasMagicInk = true;
-            }
-        }
-
-        private static void CheckForWages(JunimoHut hut) {
-            if (!Config.JunimoPayment.WorkForWages) return;
-            if (Util.Payments.WereJunimosPaidToday) return;
-            if (Util.Payments.ReceivePaymentItems(hut)) {
-                Util.Payments.WereJunimosPaidToday = true;
             }
         }
 
