@@ -158,7 +158,7 @@ namespace BetterJunimos.Abilities {
                 return false;
             }
 
-            if (location.terrainFeatures[pos] is not HoeDirt hd) return true;
+            if (!location.terrainFeatures.TryGetValue(pos, out var tf) || tf is not HoeDirt hd || hd.crop != null) return false;
             hd.crop = crop;
             applySpeedIncreases(hd);
             ApplyPaddy(hd, location);
