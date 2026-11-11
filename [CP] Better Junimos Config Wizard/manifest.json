@@ -1,0 +1,21 @@
+{
+    "Name": "[CP] Better Junimos Config Wizard",
+    "Author": "ceruleandeep",
+    "Version": "%ProjectVersion%",
+    "Description": "Adds a one-off setup event where the Wizard asks how you want your Junimos configured.",
+    "UniqueID": "ceruleandeep.BetterJunimos.CP",
+    "UpdateKeys": [],
+    "ContentPackFor": {
+        "UniqueID": "Pathoschild.ContentPatcher"
+    },
+    "Dependencies": [
+        {
+            "UniqueID": "misscoriel.eventrepeater",
+            "IsRequired": false
+        },
+        {
+            "UniqueID": "hawkfalcon.BetterJunimos",
+            "IsRequired": true
+        }
+    ]
+}
