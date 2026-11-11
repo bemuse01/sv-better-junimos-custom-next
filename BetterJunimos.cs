@@ -391,13 +391,13 @@ namespace BetterJunimos {
                 () => Config.JunimoHuts.MaxJunimos,
                 val => Config.JunimoHuts.MaxJunimos = val,
                 "cfg.max-junimos",
-                1, 40
+                1, 12
             );
             AddHostNumberOption(
                 () => Config.JunimoHuts.MaxRadius,
                 val => Config.JunimoHuts.MaxRadius = val,
                 "cfg.max-radius",
-                1, 40
+                1, 20
             );
 
             AddBoolOption(
@@ -596,6 +596,8 @@ namespace BetterJunimos {
 
         // save config.json and invalidate caches
         internal static void SaveConfig() {
+            Config.JunimoHuts.MaxJunimos = Math.Clamp(Config.JunimoHuts.MaxJunimos, 1, 12);
+            Config.JunimoHuts.MaxRadius = Math.Clamp(Config.JunimoHuts.MaxRadius, 1, 20);
             SHelper.WriteConfig(Config);
             SHelper.GameContent.InvalidateCache("Characters/Junimo");
             SHelper.GameContent.InvalidateCache($"Characters/Junimo.{SHelper.Translation.Locale}");

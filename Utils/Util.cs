@@ -197,50 +197,81 @@ namespace BetterJunimos.Utils {
             int radius = CurrentWorkingRadius;
             Point myTile = me.TilePoint;
 
-            var candidates = new List<Point>();
+            var candidates = new List<(Point pt, bool isShared)>();
+            int width = location.map.Layers[0].LayerWidth;
+            int height = location.map.Layers[0].LayerHeight;
 
             if (location.IsGreenhouse) {
-                int width = location.map.Layers[0].LayerWidth;
-                int height = location.map.Layers[0].LayerHeight;
                 for (int x = 0; x < width; ++x) {
                     for (int y = 0; y < height; ++y) {
                         var pt = new Point(x, y);
                         if (IsTileUnreachable(location, pt)) continue;
+                        if (Abilities.IdentifyJunimoAbility(location, new Vector2(x, y), id) == null) continue;
                         if (IsTileClaimedByOtherJunimo(location, x, y, me)) continue;
-                        if (Abilities.IdentifyJunimoAbility(location, new Vector2(x, y), id) != null) {
-                            candidates.Add(pt);
-                        }
+                        candidates.Add((pt, false));
                     }
                 }
             } else {
+                List<(int minX, int maxX, int minY, int maxY)> otherHutBounds = null;
+                foreach (var building in location.buildings) {
+                    if (building is JunimoHut otherHut && !ReferenceEquals(otherHut, hut)) {
+                        otherHutBounds ??= new List<(int, int, int, int)>();
+                        otherHutBounds.Add(GetHutRadiusBounds(otherHut, radius));
+                    }
+                }
+
                 var (minX, maxX, minY, maxY) = GetHutRadiusBounds(hut, radius);
+                minX = Math.Max(0, minX);
+                minY = Math.Max(0, minY);
+                maxX = Math.Min(width - 1, maxX);
+                maxY = Math.Min(height - 1, maxY);
+
                 for (int x = minX; x <= maxX; ++x) {
                     for (int y = minY; y <= maxY; ++y) {
                         var pt = new Point(x, y);
                         if (IsTileUnreachable(location, pt)) continue;
+                        if (Abilities.IdentifyJunimoAbility(location, new Vector2(x, y), id) == null) continue;
                         if (IsTileClaimedByOtherJunimo(location, x, y, me)) continue;
-                        if (Abilities.IdentifyJunimoAbility(location, new Vector2(x, y), id) != null) {
-                            candidates.Add(pt);
+
+                        bool isShared = false;
+                        if (otherHutBounds != null) {
+                            for (int i = 0; i < otherHutBounds.Count; ++i) {
+                                var b = otherHutBounds[i];
+                                if (x >= b.minX && x <= b.maxX && y >= b.minY && y <= b.maxY) {
+                                    isShared = true;
+                                    break;
+                                }
+                            }
                         }
+
+                        candidates.Add((pt, isShared));
                     }
                 }
             }
 
             if (candidates.Count == 0) return false;
 
-            // Sort by Manhattan distance from the Junimo's current position so it moves efficiently
+            // Prioritize exclusive (non-overlapping) hut tiles first, then shared tiles,
+            // sorting each group by Manhattan distance from the Junimo's current position.
             int junimoOffset = Math.Abs(me.whichJunimoFromThisHut);
+            Point hutDoor = new Point(hut.tileX.Value + 1, hut.tileY.Value + 1);
             candidates.Sort((a, b) => {
-                int distA = Math.Abs(a.X - myTile.X) + Math.Abs(a.Y - myTile.Y);
-                int distB = Math.Abs(b.X - myTile.X) + Math.Abs(b.Y - myTile.Y);
+                if (a.isShared != b.isShared) return a.isShared.CompareTo(b.isShared);
+                int distA = Math.Abs(a.pt.X - myTile.X) + Math.Abs(a.pt.Y - myTile.Y);
+                int distB = Math.Abs(b.pt.X - myTile.X) + Math.Abs(b.pt.Y - myTile.Y);
                 if (distA != distB) return distA.CompareTo(distB);
-                int tieA = Math.Abs((a.X * 31 + a.Y * 17 + junimoOffset) % 7);
-                int tieB = Math.Abs((b.X * 31 + b.Y * 17 + junimoOffset) % 7);
+                if (a.isShared) {
+                    int hutDistA = Math.Abs(a.pt.X - hutDoor.X) + Math.Abs(a.pt.Y - hutDoor.Y);
+                    int hutDistB = Math.Abs(b.pt.X - hutDoor.X) + Math.Abs(b.pt.Y - hutDoor.Y);
+                    if (hutDistA != hutDistB) return hutDistA.CompareTo(hutDistB);
+                }
+                int tieA = Math.Abs((a.pt.X * 31 + a.pt.Y * 17 + junimoOffset) % 7);
+                int tieB = Math.Abs((b.pt.X * 31 + b.pt.Y * 17 + junimoOffset) % 7);
                 return tieA.CompareTo(tieB);
             });
 
             int attempts = 0;
-            foreach (var target in candidates) {
+            foreach (var (target, _) in candidates) {
                 var controller = new PathFindController(me, location, target, -1, me.reachFirstDestinationFromHut, PathfindNodeLimit);
                 if (controller.pathToEndPoint is { Count: > 0 }) {
                     AssignTarget(me, location, target);

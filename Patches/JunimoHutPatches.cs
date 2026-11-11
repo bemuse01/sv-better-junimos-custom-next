@@ -96,15 +96,18 @@ namespace BetterJunimos.Patches {
                 gh = gl;
             }
 
-            for (var x = 0; x < gh.map.Layers[0].LayerWidth; x++) {
-                for (var y = 0; y < gh.map.Layers[0].LayerHeight; y++) {
+            int width = gh.map.Layers[0].LayerWidth;
+            int height = gh.map.Layers[0].LayerHeight;
+            for (var x = 0; x < width; x++) {
+                for (var y = 0; y < height; y++) {
                     var pt = new Point(x, y);
                     if (Util.IsTileUnreachable(gh, pt)) continue;
-                    if (Util.IsTileClaimedByOtherJunimo(gh, x, y)) continue;
 
                     var pos = new Vector2(x, y);
                     var ability = Util.Abilities.IdentifyJunimoAbility(gh, pos, hut_guid);
                     if (ability == null) continue;
+                    if (Util.IsTileClaimedByOtherJunimo(gh, x, y)) continue;
+
                     hut.lastKnownCropLocation = pt;
                     Util.Abilities.lastKnownCropLocations[(hut, gh)] = pt;
                     return true;
@@ -116,16 +119,23 @@ namespace BetterJunimos.Patches {
         }
 
         private static bool SearchHutGrid(JunimoHut hut, int radius, GameLocation farm, Guid id) {
+            int width = farm.map.Layers[0].LayerWidth;
+            int height = farm.map.Layers[0].LayerHeight;
             var (minX, maxX, minY, maxY) = Util.GetHutRadiusBounds(hut, radius);
+            minX = Math.Max(0, minX);
+            minY = Math.Max(0, minY);
+            maxX = Math.Min(width - 1, maxX);
+            maxY = Math.Min(height - 1, maxY);
+
             for (var x = minX; x <= maxX; ++x) {
                 for (var y = minY; y <= maxY; ++y) {
                     var pt = new Point(x, y);
                     if (Util.IsTileUnreachable(farm, pt)) continue;
-                    if (Util.IsTileClaimedByOtherJunimo(farm, x, y)) continue;
 
                     var pos = new Vector2(x, y);
                     var ability = Util.Abilities.IdentifyJunimoAbility(farm, pos, id);
                     if (ability == null) continue;
+                    if (Util.IsTileClaimedByOtherJunimo(farm, x, y)) continue;
 
                     hut.lastKnownCropLocation = pt;
                     Util.Abilities.lastKnownCropLocations[(hut, farm)] = pt;
