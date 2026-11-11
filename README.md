@@ -1,83 +1,21 @@
-# Better Junimos
+# Better Junimos Custom Next
 
-## Changelog
-* 3.2.0 RELEASE
-  * Respect MaxJunimos config strictly; fix runaway junimo spawning and lag on large/modded farms
-  * Junimos spawn reliably at every hut after loading a save, without the spawn hotkey
-  * Huts work off the main farm: Ginger Island and modded/expansion farms
-  * Fertilizer fixes: player-placed and junimo-placed fertilizer both work, vanilla growth-speed formula, modded fertilizers supported
-  * Botanist profession: junimo-harvested forage is iridium quality
-  * Guard harvest XP so modded skills can't crash the harvest
-  * New PlantMixedSeeds config option (default off)
-  * Fix junimos endlessly planting and digging up Tea Saplings
-  * Progression tracker no longer opens when clicking inside buildings or away from huts
-  * Fix "Could not find hut with id" log spam; orphaned junimos are cleaned up
-  * Cache hut work scans to remove periodic lag spikes with large hut radii
-* 3.1.2 RELEASE
-  * Fix performance bug with large farms (thanks to sav155)
-  * Fix occasional error with MagicalConstruction
-  * Fixed Junimos Planting Tree Fertilizer wrong
-  * Powdermelons are now giant crops
-  * Other mods (Data Layers) should now be able to show proper harvest radius
-* 3.0 RELEASE
-  * Update for SDV 1.6 / SMAPI 4.0
-* 2.1.2
-  * Missing from this repo
-  * Note: 3.0 does not include any changes between 2.0.8 and 2.1.2 as that souce is missing.
-* 2.0.8 RELEASE
-  * Redo asset loaders for new SMAPI
-  * How bout we actually bundle the CP mod into the bundle this time
-* 2.0.7 RELEASE
-  * Add a bit of logging to the Junimo spawn key
-  * Work Ridiculously Fast mode is now ridiculous
-* 2.0.6 RELEASE
-  * Incorporate changes since 2.0.4 
-* 2.0.6-beta8
-  * Remove Event Repeater fields from configuration event. Otherwise event happens each day when Event Repeater installed.
-* 2.0.6-beta7
-  * Add event when first hut is built to ask configuration questions. Sets up wages and progression, explains hut menu and greenhouse
-* 2.0.6-beta6
-    * Add config option to disable harvesting of all remaining crops at end of season. For use when player has mod that allows crop survival across seasons esp. flowers.
-    * Add config option to disable out-of-season check when planting seeds. For use when player has mod that allows all-season growing but doesn't update the seasons check properly.
-    * Use warp point from greenhouse map when kicking Junimos out of the greenhouse. For realistic leaving behaviour when using custom greenhouse.
-    * PathfindToRandomSpot now considers the entire greenhouse fair game including for custom greenhouses. Stops disturbing behaviour where Junimos appear to hang around the work area in a scary swarm.
-    * Paddy crops sown near water get correct 25% growth boost.
-* 2.0.6-beta5
-    * Fix the pathfinding override for Junimo spawn in greenhouse. Makes custom greenhouses work.
-    * Suppress Junimos-need-payment message when closing a non-hut chest. OnDayStarted now tags all Junimo hut chests via modData, so when an ItemGrabMenu gets closed we can see if it's for one of our hut chests.
-* 2.0.6-beta4
-   * Payment-needed message shows what items are still outstanding. Helps users understand what's going on when items vanish from the chest during partial-payment situations.
-    * Add console commands `bj_list_abilities`, `bj_list_cooldowns`, `bj_reset_cooldowns`. Mostly used to narrow down what's going on when Junimos seem to be work-shy.
-* 2.0.6-beta2
-  * Add ability for Junimos to warp into greenhouse within range of hut. Enables a Junimo hut to do work in nearby greenhouse.
-  * Add API signatures to pass location to plugin abilities, not just Farm. Allows BJ plugins to support non-farm locations in particular the greenhouse.
-  * Rewrite all abilities to work in the greenhouse.
-  * Rewrite Junimo pathfinding to work in the greenhouse.
-  * Rewrite action availability search to work in the greenhouse.
-* 2.0.6-beta1
-    * Change how Abilities dictionary is loaded/saved. Allows centralized control of all BJ and plugin-provided abilities. In future this might be possible via GMCM.
-    * Keep farmhands out of the hut progression menu. Progression information and a lot of the hut settings are not synced so the menu is wildly inaccurate.
-* 2.0.5-beta8
-  * Detect when player has Alternative Textures installed and tool active. Allows players to repaint the hut without the progression menu ruining everything.
-  * Allow custom keybind for opening hut progression menu, and for menu to be disabled entirely. Options of last resort for players who need the hut menu click available for some other mod to use.
-* 2.0.5-beta7
-  * Add API call `ShowConfigurationMenu` to open BJ's GMCM menu. Allows BJF to have a configuration icon on the HUD menu.
-  * Add configuration option `WorkRidiculouslyFast` to shorten harvesting delays as much as possible. Junimos are still not working at a truly ridiculous rate because they run out of work to do within the ten-minute, further work needed.
-* 2.0.5-beta5
-  * Move progression data out of the save into Farm.modData. Allows all players in MP game to contribute to progression quests.
-  * Remove checks that prevent various updates running for MP farmhands, now that the mod is more MP-safe 
-  * Option to grant experience for harvesting, farming and foraging. Provided against my better judgement for players who need lots of XP for Walk of Life but won't adjust WoL's options.
-  * Build list of all available fertilizers in FertilizeAbility. Removes a hardcode so next time CA or soeme mod adds GlobalHyperMegaNetSpeedGro, Junimos will start using it.
-  * Add a default unlock cost to all abilities when registered. Allows plugin-provided abilities to at least kinda participate in the progression system.
-* 2.0.5-beta4
-  * Add Korean translation from wally232
-* 2.0.5-beta3
-  * Move more strings out into i18n files. Improves ability to translate mod content.
-* 2.0.5-beta2
-  * Streamline how hut radius is calculated
-* 2.0.5-beta1
-  * Ensure latest configuration settings are always used.  In particular hut radius is always recalculated.Allows GMCM config changes in-game.  
-  * Display whether Junimos have been paid in hut info. Helps users understand when Junimos are on strike rather than just lazy.
-* 2.0.3
-  * Add debug commands to list huts/abilities/actions, trigger and unlock progression quests in console.
-  * Avoid accessing save data when running as MP farmhand 
+스타듀밸리 모드 [Better Junimos](https://github.com/hawkfalcon/Stardew-Mods) (원작자: **hawkfalcon**, **ceruleandeep**)를 기반으로 주니모 AI 탐색 알고리즘을 개선하고 구조적인 버그들을 수정한 커스텀 모드입니다.
+
+## 주요 개선 사항
+* **탐색 반경 일관화**: 주니모 오두막(3×2) 외곽을 기준으로 상·하·좌·우 모든 방향의 탐색 및 행동 반경이 설정된 반경(기본값 `7`)과 정확히 일치하도록 개선했습니다.
+* **주니모 AI 탐색 및 작업 배정 최적화**:
+  * 이동 중인 목표 타일뿐만 아니라 현재 작업 수행 중인 타일까지 예약(Reservation)하여 주니모들의 행동이 겹치지 않도록 개선했습니다.
+  * 현재 주니모 위치에서 가장 가까운 작업 타일부터 A* 길찾기(스프링클러, 허수아비 등 장애물 우회)를 수행하며, 도달 불가능한 타일은 일시 제외하여 멈춤 없이 다음 타일로 이동합니다.
+  * 한 타일에서 `[죽은 작물 제거 → 수확 → 비료 → 파종 → 물주기]` 등 연속 작업이 가능한 경우 자리를 뜨지 않고 즉시 연달아 처리합니다.
+  * 스폰 직후 불필요한 배회, 작업 중 3.5% 확률 배회, 할 일이 남았음에도 25% 확률로 조기 퇴근하던 문제를 제거했습니다.
+  * 바닐라 `pokeToHarvest()`의 30% 호출 누락 및 타이머 전환 조건 누락으로 인해 주니모가 아무것도 하지 않고 멈춰 서 있던 현상을 해결했습니다.
+* **성능(CPU/메모리) 최적화**: 타일 스캔 시 불필요한 객체(`Object`, `Crop`, 리스트 복사본) 반복 생성을 제거하고 캐싱을 적용했습니다.
+* **불필요/치트 옵션 정리**: `InfiniteJunimoInventory`(무한 인벤토리 치트), `WorkFaster`, `WorkRidiculouslyFast` 옵션을 제거하고 최적화된 작업 반응 속도를 기본 동작으로 내장했습니다.
+
+## 변경 이력
+버전별 상세 변경 사항은 [CHANGELOG.md](CHANGELOG.md)에서 확인할 수 있습니다.
+
+## 크레딧 (Credits)
+* **원본 모드 (Original Mod)**: [Better Junimos](https://www.nexusmods.com/stardewvalley/mods/2221) by **hawkfalcon** & **ceruleandeep**
+* **커스텀 수정 (Modified by)**: **bemuse01**

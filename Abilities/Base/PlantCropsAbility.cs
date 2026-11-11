@@ -19,6 +19,8 @@ namespace BetterJunimos.Abilities {
         private const string SunflowerSeeds = "431";
         private const string TeaSapling = "251";
         static Dictionary<string, Dictionary<string, bool>> cropSeasons = new();
+        private static readonly Dictionary<string, bool> IsTrellisCache = new();
+        private static readonly Dictionary<string, bool> IsCropSeedCache = new();
 
         internal PlantCropsAbility(IMonitor Monitor) {
             this.Monitor = Monitor;
@@ -66,41 +68,41 @@ namespace BetterJunimos.Abilities {
 
         /// <summary>Get an item from the chest that is a crop seed, plantable in this season</summary>
         private Item PlantableSeed(GameLocation location, Chest chest, string cropType = null) {
-            var foundItems = chest.Items.ToList().FindAll(item => item != null
-                //&& new StardewValley.Object(item.ItemId, 1).Type == "Seeds"
-                && !(BetterJunimos.Config.JunimoImprovements.AvoidPlantingCoffee && item.ItemId == Util.CoffeeItemId));
-            foundItems = foundItems.FindAll(item => IsCrop(item, location));
-            switch (cropType) {
-                case CropTypes.Trellis:
-                    foundItems = foundItems.FindAll(item => IsTrellisCrop(item, location));
-                    break;
-                case CropTypes.Ground:
-                    foundItems = foundItems.FindAll(item => !IsTrellisCrop(item, location));
-                    break;
-            }
+            bool avoidCoffee = BetterJunimos.Config.JunimoImprovements.AvoidPlantingCoffee;
+            bool isGreenhouse = location.IsGreenhouse;
+            bool avoidOutOfSeason = BetterJunimos.Config.JunimoImprovements.AvoidPlantingOutOfSeason;
 
-            if (foundItems.Count == 0) return null;
-            if (location.IsGreenhouse) return foundItems.First();
-            if (!BetterJunimos.Config.JunimoImprovements.AvoidPlantingOutOfSeason) return foundItems.First();
+            foreach (var item in chest.Items) {
+                if (item == null) continue;
+                if (avoidCoffee && item.ItemId == Util.CoffeeItemId) continue;
+                if (!IsCrop(item, location)) continue;
 
-            foreach (var foundItem in foundItems) {
-                // TODO: check if item can grow to harvest before end of season
-                if (foundItem.ItemId == SunflowerSeeds && Game1.IsFall && Game1.dayOfMonth >= 25) {
+                if (cropType == CropTypes.Trellis && !IsTrellisCrop(item, location)) continue;
+                if (cropType == CropTypes.Ground && IsTrellisCrop(item, location)) continue;
+
+                if (isGreenhouse || !avoidOutOfSeason) {
+                    return item;
+                }
+
+                if (item.ItemId == SunflowerSeeds && Game1.IsFall && Game1.dayOfMonth >= 25) {
                     // there is no way that a sunflower planted on Fall 25 will grow to harvest
                     continue;
                 }
 
-                var key = foundItem.ItemId;
-                try {
-                    if (cropSeasons[Game1.currentSeason][key]) {
-                        return foundItem;
-                    }
-                } catch (KeyNotFoundException) {
+                var key = item.ItemId;
+                if (!cropSeasons.TryGetValue(Game1.currentSeason, out var seasonDict)) {
+                    seasonDict = new Dictionary<string, bool>();
+                    cropSeasons[Game1.currentSeason] = seasonDict;
+                }
+
+                if (!seasonDict.TryGetValue(key, out bool inSeason)) {
                     var crop = new Crop(key, 0, 0, location);
-                    cropSeasons[Game1.currentSeason][key] = crop.IsInSeason(location);
-                    if (cropSeasons[Game1.currentSeason][key]) {
-                        return foundItem;
-                    }
+                    inSeason = crop.IsInSeason(location);
+                    seasonDict[key] = inSeason;
+                }
+
+                if (inSeason) {
+                    return item;
                 }
             }
 
@@ -108,8 +110,17 @@ namespace BetterJunimos.Abilities {
         }
 
         private bool IsTrellisCrop(Item item, GameLocation location) {
-            Crop crop = new Crop(item.ItemId, 0, 0, location);
-            return crop.raisedSeeds.Value;
+            if (IsTrellisCache.TryGetValue(item.ItemId, out bool isTrellis)) {
+                return isTrellis;
+            }
+            if (Game1.cropData.TryGetValue(item.ItemId, out var data)) {
+                isTrellis = data.IsRaised;
+            } else {
+                Crop crop = new Crop(item.ItemId, 0, 0, location);
+                isTrellis = crop.raisedSeeds.Value;
+            }
+            IsTrellisCache[item.ItemId] = isTrellis;
+            return isTrellis;
         }
 
         //Verify if the item is a crop seed
@@ -122,13 +133,16 @@ namespace BetterJunimos.Abilities {
                 return BetterJunimos.Config.JunimoImprovements.PlantMixedSeeds;
             }
 
-            // Tea Saplings are Seeds (-74) but plant a Bush, not a Crop.  They can
-            // never be planted as a crop, so junimos holding one would walk out and
-            // retry forever (reported on Nexus: junimos planting and digging up the
-            // same tea sapling over and over).
+            // Tea Saplings are Seeds (-74) but plant a Bush, not a Crop.
             if (item.ItemId == TeaSapling) return false;
 
-            return !Tree.GetWildTreeSeedLookup().Keys.Contains(item.ItemId) && !Game1.fruitTreeData.Keys.Contains(item.ItemId);
+            if (IsCropSeedCache.TryGetValue(item.ItemId, out bool isCropSeed)) {
+                return isCropSeed;
+            }
+
+            isCropSeed = !Tree.GetWildTreeSeedLookup().Keys.Contains(item.ItemId) && !Game1.fruitTreeData.Keys.Contains(item.ItemId);
+            IsCropSeedCache[item.ItemId] = isCropSeed;
+            return isCropSeed;
         }
 
         public List<string> RequiredItems() {

@@ -28,8 +28,6 @@
   "success.UnlimitedJunimos": "이제 주니모들을 무제한으로 가질 수 있습니다.",
   "prompt.Water": "{{qty}} {{item}}에 대해 주니모들은 작물에 물을 줄 수 있습니다.",
   "success.Water": "이제 주니모들은 작물에 물을 줄 수 있습니다.",
-  "prompt.WorkFaster": "{{qty}} {{item}}의 경우 Junimos가 더 빠르게 일할 수 있습니다.",
-  "success.WorkFaster": "이제 주니모들은 더 빠르게 일할 수 있습니다.",
 
   "cfg.hut-settings": "오두막 설정",
   "cfg.max-junimos": "최대 주니모",
@@ -45,7 +43,6 @@
   "cfg.can-work-in-rain": "빗속에서도 일할 수 있습니다.",
   "cfg.can-work-in-winter": "겨울에도 일할 수 있습니다.",
   "cfg.can-work-in-evenings": "저녁에도 일할 수 있습니다.",
-  "cfg.work-faster": "더 빠르게 작업",
   "cfg.avoid-harvesting-flowers": "꽃 수확 방지",
   "cfg.avoid-harvesting-giant-crops": "거대작물 수확 방지",
   "cfg.avoid-harvesting-giant-crops.tooltip": "거대한 작물로 변할 수 있는 작물을 수확하지 마십시오.",
@@ -63,8 +60,6 @@
   "cfg.always-have-umbrellas.tooltip": "주니모들은 항상 잎 우산을 가지고 있습니다.",
   "cfg.more-colorful-umbrellas": "더 다체로운 우산",
   "cfg.more-colorful-umbrellas.tooltip": "더 다채로운 잎 우산",
-  "cfg.infinite-inventory": "무한 인벤토리",
-  "cfg.infinite-inventory.tooltip": "무한 주니모 인벤토리",
   "cfg.spawn-junimo-keybind": "주니모 단축기 활성화",
   "cfg.receive-messages": "메세지 수신",
   

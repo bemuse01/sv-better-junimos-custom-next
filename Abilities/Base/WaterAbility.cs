@@ -15,7 +15,7 @@ namespace BetterJunimos.Abilities {
             if (!location.terrainFeatures.ContainsKey(pos)) return false;
             if (location.terrainFeatures[pos] is not HoeDirt hd) return false;
             if (hd.state.Value == HoeDirt.watered) return false;
-            if (hd.crop == null) return false;
+            if (hd.crop == null || hd.crop.dead.Value) return false;
             return true;
         }
 

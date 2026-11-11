@@ -9,7 +9,7 @@ namespace BetterJunimos {
 
         internal class HutSettings {
             public int MaxJunimos { get; set; } = 3;
-            public int MaxRadius { get; set; } = 8;
+            public int MaxRadius { get; set; } = 7;
             public bool AvailableAfterCommunityCenterComplete { get; set; } = true;
             public bool AvailableImmediately { get; set; } = false;
             public bool ReducedCostToConstruct { get; set; } = true;
@@ -23,8 +23,6 @@ namespace BetterJunimos {
             public bool CanWorkInWinter { get; set; } = true;
             public bool CanWorkInEvenings { get; set; } = true;
             public bool CanWorkInGreenhouse { get; set; } = true;
-            public bool WorkFaster { get; set; } = true;
-            public bool WorkRidiculouslyFast { get; set; }
             public bool AvoidHarvestingFlowers { get; set; } = true;
             public bool AvoidHarvestingGiants { get; set; } = true;
             public bool HarvestEverythingOn28th { get; set; } = true;
@@ -55,8 +53,6 @@ namespace BetterJunimos {
             public float RainyJunimoSpiritFactor = 0.65f;
             public bool JunimosAlwaysHaveLeafUmbrellas { get; set; } = false;
             public bool MoreColorfulLeafUmbrellas { get; set; } = false;
-            // Cheat: Junimos never use up items from the hut chest; see Util.RemoveItemFromChest.
-            public bool InfiniteJunimoInventory { get; set; } = false;
         }
 
         public OtherSettings Other { get; set; } = new();

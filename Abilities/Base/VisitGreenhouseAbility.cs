@@ -33,7 +33,7 @@ namespace BetterJunimos.Abilities {
                 return false;
             }
 
-            if (!Util.Abilities.lastKnownCropLocations.TryGetValue((hut, greenhouse), out var lkc)) {
+            if (!Util.Abilities.lastKnownCropLocations.TryGetValue((hut, greenhouse), out var lkc) || lkc.Equals(Point.Zero)) {
                 if (!Patches.PatchSearchAroundHut.SearchGreenhouseGrid(Util.GetHutFromId(guid), guid, greenhouse)) {
                     // no work to be done in greenhouse
                     return false;

@@ -142,8 +142,6 @@ namespace BetterJunimos.Utils {
                     return (true, BetterJunimos.Config.JunimoHuts.MaxJunimos > InitialJunimosLimit);
                 case "UnlimitedJunimos":
                     return (true, BetterJunimos.Config.JunimoHuts.MaxJunimos > MoreJunimosLimit);
-                case "WorkFaster":
-                    return (true, BetterJunimos.Config.JunimoImprovements.WorkFaster);
                 case "CanWorkInWinter":
                     return (true, BetterJunimos.Config.JunimoImprovements.CanWorkInWinter);
                 case "CanWorkInRain":
@@ -210,14 +208,6 @@ namespace BetterJunimos.Utils {
             }
         }
 
-        public bool WorkFaster {
-            get {
-                if (!BetterJunimos.Config.JunimoImprovements.WorkFaster) return false;
-                if (!BetterJunimos.Config.Progression.Enabled) return true;
-                return Unlocked("WorkFaster");
-            }
-        }
-
         public bool CanUseAbility(IJunimoAbility ability) {
             if (!BetterJunimos.Config.Progression.Enabled) return true;
 
@@ -247,8 +237,6 @@ namespace BetterJunimos.Utils {
                 DisplayPromptFor("MoreJunimos");
             } else if (BetterJunimos.Config.JunimoHuts.MaxJunimos >= MaxJunimosUnlocked && Unlocked("MoreJunimos") && LockedAndNotPrompted("UnlimitedJunimos")) {
                 DisplayPromptFor("UnlimitedJunimos");
-            } else if (LockedAndNotPrompted("WorkFaster") && BetterJunimos.Config.JunimoImprovements.WorkFaster) {
-                DisplayPromptFor("WorkFaster");
             } else if (LockedAndNotPrompted("ReducedCostToConstruct") && BetterJunimos.Config.JunimoHuts.ReducedCostToConstruct) {
                 DisplayPromptFor("ReducedCostToConstruct");
             }
@@ -366,11 +354,6 @@ namespace BetterJunimos.Utils {
                 $"{Get("tracker.working-radius")}: {Util.CurrentWorkingRadius} {Get("tracker.current")}, {BetterJunimos.Config.JunimoHuts.MaxRadius} {Get("tracker.configured")}"
             };
 
-            // easy to turn on by mistake; show it here where players look when troubleshooting
-            if (BetterJunimos.Config.FunChanges.InfiniteJunimoInventory) {
-                quests.Add(Get("cfg.infinite-inventory"));
-            }
-
             if (!Context.IsMainPlayer) {
                 quests.Add(Get("tracker.progression-info-host-only"));
             } else {
@@ -457,8 +440,8 @@ namespace BetterJunimos.Utils {
 
             _monitor.Log($"{Get("debug.available-actions-for-hut-at")} [{hut.tileX} {hut.tileY}] ({id}):", LogLevel.Debug);
 
-            for (var x = hut.tileX.Value + 1 - radius; x < hut.tileX.Value + 2 + radius; ++x) {
-                for (var y = hut.tileY.Value + 1 - radius; y < hut.tileY.Value + 2 + radius; ++y) {
+            for (var x = hut.tileX.Value - radius; x <= hut.tileX.Value + 2 + radius; ++x) {
+                for (var y = hut.tileY.Value - radius; y <= hut.tileY.Value + 1 + radius; ++y) {
                     var pos = new Vector2(x, y);
 
                     var ability = Util.Abilities.IdentifyJunimoAbility(farm, pos, id);

@@ -57,13 +57,13 @@ namespace BetterJunimos.Utils {
         // register built in abilities, in order
         internal void RegisterDefaultAbilities() {
             var defaultAbilities = new List<IJunimoAbility> {
-                new WaterAbility(),
-                new FertilizeAbility(),
-                new PlantCropsAbility(_monitor),
+                new ClearDeadCropsAbility(),
                 new HarvestCropsAbility(),
                 new HarvestBushesAbility(),
                 new HarvestForageCropsAbility(),
-                new ClearDeadCropsAbility(),
+                new FertilizeAbility(),
+                new PlantCropsAbility(_monitor),
+                new WaterAbility(),
                 new VisitGreenhouseAbility(),
             };
             foreach (var junimoAbility in defaultAbilities) {
@@ -155,18 +155,16 @@ namespace BetterJunimos.Utils {
 
         public static void ResetCooldowns() {
             FailureCooldowns.Clear();
+            Util.ClearUnreachableTiles();
         }
 
         public static bool ActionCoolingDown(GameLocation location, IJunimoAbility ability, Vector2 pos) {
-            // TODO: cooldowns for greenhouse
-            if (location.IsGreenhouse) {
-                return false;
-            }
-
             var cd = (location, pos, ability);
             if (!FailureCooldowns.TryGetValue(cd, out var failureTime)) return false;
-            if (failureTime <= Game1.timeOfDay - 1000) return false;
-            BetterJunimos.SMonitor.Log($"Action {ability.AbilityName()} at [{pos.X} {pos.Y}] is in cooldown");
+            if (failureTime <= Game1.timeOfDay - 100) {
+                FailureCooldowns.Remove(cd);
+                return false;
+            }
             return true;
         }
 

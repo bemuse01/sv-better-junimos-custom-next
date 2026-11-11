@@ -52,8 +52,8 @@ namespace BetterJunimos {
             int dx = (int)pos.X - hut.tileX.Value;
             int dy = (int)pos.Y - hut.tileY.Value;
 
-            int mx = radius - 1 + dx;
-            int my = radius - 1 + dy;
+            int mx = radius + dx;
+            int my = radius + dy;
 
 
             string ct;

@@ -24,11 +24,6 @@
     "Remarks": "gold bar",
     "Stack": 5
   },
-  "WorkFaster": {
-    "Item": 260,
-    "Remarks": "hot pepper",
-    "Stack": 10
-  },
   "CanWorkInWinter": {
     "Item": 440,
     "Remarks": "wool",

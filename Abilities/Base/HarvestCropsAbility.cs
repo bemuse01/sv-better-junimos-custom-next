@@ -10,7 +10,8 @@ using StardewModdingAPI;
 namespace BetterJunimos.Abilities {
     public class HarvestCropsAbility : IJunimoAbility {
         // Pumpkin, Cauliflower, Melon, Powdermelon
-        private List<int> giantCrops = new() { 190, 254, 276, 889 };
+        private static readonly HashSet<string> GiantCrops = new() { "190", "254", "276", "889", "PowdermelonSeeds" };
+        private const string SunflowerId = "421";
 
         internal HarvestCropsAbility() { }
 
@@ -48,10 +49,11 @@ namespace BetterJunimos.Abilities {
         }
 
         private bool ShouldAvoidHarvesting(Vector2 pos, HoeDirt hd) {
-            var item = new StardewValley.Object(hd.crop.indexOfHarvest.Value, 1);
+            string harvestId = hd.crop.indexOfHarvest.Value;
+            if (string.IsNullOrEmpty(harvestId)) return false;
 
             // TODO: check properly if the crop will die tomorrow instead of special-casing 
-            if (item.ParentSheetIndex == 421) {
+            if (harvestId == SunflowerId) {
                 // if it's the last day of Fall, harvest sunflowers
                 if (Game1.IsFall && Game1.dayOfMonth >= 28 && BetterJunimos.Config.JunimoImprovements.HarvestEverythingOn28th) return false;
             } else {
@@ -59,11 +61,13 @@ namespace BetterJunimos.Abilities {
                 if (Game1.dayOfMonth >= 28 && BetterJunimos.Config.JunimoImprovements.HarvestEverythingOn28th) return false;
             }
 
-            if (BetterJunimos.Config.JunimoImprovements.AvoidHarvestingGiants && giantCrops.Contains(item.ParentSheetIndex)) {
+            if (BetterJunimos.Config.JunimoImprovements.AvoidHarvestingGiants && GiantCrops.Contains(harvestId)) {
                 return true;
             }
 
-            if (BetterJunimos.Config.JunimoImprovements.AvoidHarvestingFlowers && item.Category == StardewValley.Object.flowersCategory) {
+            if (BetterJunimos.Config.JunimoImprovements.AvoidHarvestingFlowers &&
+                Game1.objectData.TryGetValue(harvestId, out var objData) &&
+                objData.Category == StardewValley.Object.flowersCategory) {
                 return true;
             }
 

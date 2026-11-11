@@ -14,6 +14,13 @@ namespace BetterJunimos.Abilities {
         }
 
         public bool IsActionAvailable(GameLocation location, Vector2 pos, Guid guid) {
+            if (location.objects.TryGetValue(pos, out var tileObj) && tileObj != null && !tileObj.isPassable()) {
+                return false;
+            }
+
+            var hut = Util.GetHutFromId(guid);
+            var radius = Util.CurrentWorkingRadius;
+
             Vector2 up = new Vector2(pos.X, pos.Y + 1);
             Vector2 right = new Vector2(pos.X + 1, pos.Y);
             Vector2 down = new Vector2(pos.X, pos.Y - 1);
@@ -21,8 +28,26 @@ namespace BetterJunimos.Abilities {
 
             Vector2[] positions = { up, right, down, left };
             foreach (Vector2 nextPos in positions) {
+                if (hut != null && !location.IsGreenhouse && !Util.IsWithinHutRadius(hut, nextPos, radius)) {
+                    continue;
+                }
                 if (location.objects.ContainsKey(nextPos) && location.objects[nextPos].isForage()) {
-                    return true;
+                    Vector2[] forageNeighbors = {
+                        new Vector2(nextPos.X, nextPos.Y + 1),
+                        new Vector2(nextPos.X + 1, nextPos.Y),
+                        new Vector2(nextPos.X, nextPos.Y - 1),
+                        new Vector2(nextPos.X - 1, nextPos.Y)
+                    };
+                    bool alreadyTargeted = false;
+                    foreach (Vector2 neighbor in forageNeighbors) {
+                        if (neighbor != pos && Util.IsTileClaimedByOtherJunimo(location, (int)neighbor.X, (int)neighbor.Y)) {
+                            alreadyTargeted = true;
+                            break;
+                        }
+                    }
+                    if (!alreadyTargeted) {
+                        return true;
+                    }
                 }
             }
 
@@ -30,7 +55,9 @@ namespace BetterJunimos.Abilities {
         }
 
         public bool PerformAction(GameLocation location, Vector2 pos, JunimoHarvester junimo, Guid guid) {
-            Chest chest = Util.GetHutFromId(guid).GetOutputChest();
+            var hut = Util.GetHutFromId(guid);
+            Chest chest = hut.GetOutputChest();
+            var radius = Util.CurrentWorkingRadius;
 
             Vector2 up = new Vector2(pos.X, pos.Y + 1);
             Vector2 right = new Vector2(pos.X + 1, pos.Y);
@@ -40,6 +67,10 @@ namespace BetterJunimos.Abilities {
             int direction = 0;
             Vector2[] positions = { up, right, down, left };
             foreach (Vector2 nextPos in positions) {
+                if (hut != null && !location.IsGreenhouse && !Util.IsWithinHutRadius(hut, nextPos, radius)) {
+                    direction++;
+                    continue;
+                }
                 if (location.objects.ContainsKey(nextPos) && location.objects[nextPos].isForage()) {
                     junimo.faceDirection(direction);
                     SetForageQuality(location, nextPos);

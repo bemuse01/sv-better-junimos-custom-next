@@ -94,11 +94,15 @@ namespace BetterJunimos.Patches {
 
             for (var x = 0; x < gh.map.Layers[0].LayerWidth; x++) {
                 for (var y = 0; y < gh.map.Layers[0].LayerHeight; y++) {
+                    var pt = new Point(x, y);
+                    if (Util.IsTileUnreachable(gh, pt)) continue;
+                    if (Util.IsTileClaimedByOtherJunimo(gh, x, y)) continue;
+
                     var pos = new Vector2(x, y);
                     var ability = Util.Abilities.IdentifyJunimoAbility(gh, pos, hut_guid);
                     if (ability == null) continue;
-                    hut.lastKnownCropLocation = new Point(x, y);
-                    Util.Abilities.lastKnownCropLocations[(hut, gh)] = new Point(x, y);
+                    hut.lastKnownCropLocation = pt;
+                    Util.Abilities.lastKnownCropLocations[(hut, gh)] = pt;
                     return true;
                 }
             }
@@ -108,14 +112,19 @@ namespace BetterJunimos.Patches {
         }
 
         private static bool SearchHutGrid(JunimoHut hut, int radius, GameLocation farm, Guid id) {
-            for (var x = hut.tileX.Value + 1 - radius; x < hut.tileX.Value + 2 + radius; ++x) {
-                for (var y = hut.tileY.Value + 1 - radius; y < hut.tileY.Value + 2 + radius; ++y) {
+            var (minX, maxX, minY, maxY) = Util.GetHutRadiusBounds(hut, radius);
+            for (var x = minX; x <= maxX; ++x) {
+                for (var y = minY; y <= maxY; ++y) {
+                    var pt = new Point(x, y);
+                    if (Util.IsTileUnreachable(farm, pt)) continue;
+                    if (Util.IsTileClaimedByOtherJunimo(farm, x, y)) continue;
+
                     var pos = new Vector2(x, y);
                     var ability = Util.Abilities.IdentifyJunimoAbility(farm, pos, id);
                     if (ability == null) continue;
 
-                    hut.lastKnownCropLocation = new Point(x, y);
-                    Util.Abilities.lastKnownCropLocations[(hut, farm)] = new Point(x, y);
+                    hut.lastKnownCropLocation = pt;
+                    Util.Abilities.lastKnownCropLocations[(hut, farm)] = pt;
                     return true;
                 }
             }

@@ -251,12 +251,6 @@ namespace BetterJunimos {
             }
 
             if (huts.Any()) {
-                // players turn this on by mistake and then report items not being used up
-                if (Config.FunChanges.InfiniteJunimoInventory) {
-                    Monitor.LogOnce("FunChanges.InfiniteJunimoInventory is on: Junimos don't use up seeds, " +
-                                    "fertilizer, wages or ability items.", LogLevel.Info);
-                }
-
                 CheckHutsForWagesAndProgressionItems();
                 Util.Progression.DayStartedProgressionPrompt(Game1.IsWinter, Game1.isRaining);
                 JunimoAbilities.ResetCooldowns();
@@ -456,18 +450,6 @@ namespace BetterJunimos {
                 "cfg.can-work-in-greenhouse",
                 "cfg.can-work-in-greenhouse.tooltip"
             );
-            AddHostBoolOption(
-                () => Config.JunimoImprovements.WorkFaster,
-                val => Config.JunimoImprovements.WorkFaster = val,
-                "cfg.work-faster",
-                "cfg.work-faster.tooltip"
-            );
-            AddHostBoolOption(
-                () => Config.JunimoImprovements.WorkRidiculouslyFast,
-                val => Config.JunimoImprovements.WorkRidiculouslyFast = val,
-                "cfg.work-ridiculously-fast",
-                "cfg.work-ridiculously-fast.tooltip"
-            );
 
             AddHostBoolOption(
                 () => Config.JunimoImprovements.AvoidHarvestingFlowers,
@@ -566,12 +548,6 @@ namespace BetterJunimos {
                 val => Config.FunChanges.MoreColorfulLeafUmbrellas = val,
                 "cfg.more-colorful-umbrellas",
                 "cfg.more-colorful-umbrellas.tooltip"
-            );
-            AddBoolOption(
-                () => Config.FunChanges.InfiniteJunimoInventory,
-                val => Config.FunChanges.InfiniteJunimoInventory = val,
-                "cfg.infinite-inventory",
-                "cfg.infinite-inventory.tooltip"
             );
             AddKeybind(
                 () => Config.Other.SpawnJunimoKeybind,

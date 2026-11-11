@@ -44,8 +44,8 @@ namespace BetterJunimos.Utils {
             var radius = Util.CurrentWorkingRadius;
             var farm = hut.GetParentLocation();
 
-            for (var x = hut.tileX.Value + 1 - radius; x < hut.tileX.Value + 2 + radius; ++x) {
-                for (var y = hut.tileY.Value + 1 - radius; y < hut.tileY.Value + 2 + radius; ++y) {
+            for (var x = hut.tileX.Value - radius; x <= hut.tileX.Value + 2 + radius; ++x) {
+                for (var y = hut.tileY.Value - radius; y <= hut.tileY.Value + 1 + radius; ++y) {
                     var pos = new Vector2(x, y);
 
                     var ghb = GreenhouseBuildingAtPos(farm, pos);
