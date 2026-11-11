@@ -176,47 +176,72 @@ namespace BetterJunimos.Utils {
 
         public static bool ItemInHut(Guid id, List<string> items) {
             if (items.Count == 0) return true;
-            return items.Any(item => ItemInHut(id, item));
+            for (int i = 0; i < items.Count; ++i) {
+                if (ItemInHut(id, items[i])) return true;
+            }
+            return false;
         }
 
         internal void UpdateHutItems(Guid id) {
             if (id == Guid.Empty) return;
             var hut = Util.GetHutFromId(id);
-            if (hut is null) return;
-            var chest = hut.GetOutputChest();
-            UpdateHutContainsItems(id, chest, _requiredItems.ToList<string>());
+            UpdateHutItems(id, hut);
         }
 
-        private void UpdateHutContainsItems(Guid id, Chest chest, List<string> items) {
-            foreach (var itemId in items) {
-                if (!ItemsInHuts.ContainsKey(id)) {
-                    ItemsInHuts.Add(id, new Dictionary<string, bool>());
-                }
+        internal void UpdateHutItems(Guid id, JunimoHut hut) {
+            if (id == Guid.Empty || hut is null) return;
+            var chest = hut.GetOutputChest();
+            UpdateHutContainsItems(id, chest, _requiredItems);
+        }
 
+        private void UpdateHutContainsItems(Guid id, Chest chest, IEnumerable<string> items) {
+            if (!ItemsInHuts.TryGetValue(id, out var hutItems)) {
+                hutItems = new Dictionary<string, bool>();
+                ItemsInHuts[id] = hutItems;
+            }
+
+            foreach (var itemId in items) {
                 // item categories start with a -
                 if (itemId.StartsWith("-"))
-                    UpdateHutContainsItemCategory(id, chest, itemId);
+                    UpdateHutContainsItemCategory(hutItems, chest, itemId);
                 else
-                    UpdateHutContainsItemId(id, chest, itemId);
+                    UpdateHutContainsItemId(hutItems, chest, itemId);
             }
         }
 
-        private static void UpdateHutContainsItemId(Guid id, Chest chest, string itemId) {
-            ItemsInHuts[id][itemId] = chest.Items.Any(item =>
-                item != null && item.ItemId == itemId && !(BetterJunimos.Config.JunimoImprovements.AvoidPlantingCoffee && item.ItemId == Util.CoffeeItemId));
+        private static void UpdateHutContainsItemId(Dictionary<string, bool> hutItems, Chest chest, string itemId) {
+            bool avoidCoffee = BetterJunimos.Config.JunimoImprovements.AvoidPlantingCoffee;
+            bool found = false;
+            foreach (var item in chest.Items) {
+                if (item != null && item.ItemId == itemId && !(avoidCoffee && item.ItemId == Util.CoffeeItemId)) {
+                    found = true;
+                    break;
+                }
+            }
+            hutItems[itemId] = found;
         }
 
-        private static void UpdateHutContainsItemCategory(Guid id, Chest chest, string itemCategory) {
+        private static void UpdateHutContainsItemCategory(Dictionary<string, bool> hutItems, Chest chest, string itemCategory) {
             string coffeeItemId = Util.CoffeeItemId;
             string seedsCategory = SObject.SeedsCategory.ToString();
-            ItemsInHuts[id][itemCategory] = chest.Items.Any(item => {
-                if (item == null) return false;
+            string fertilizerCategory = SObject.fertilizerCategory.ToString();
+            bool avoidCoffee = BetterJunimos.Config.JunimoImprovements.AvoidPlantingCoffee;
+            bool found = false;
+
+            foreach (var item in chest.Items) {
+                if (item == null) continue;
                 bool isMatch = item.Category.ToString() == itemCategory;
                 if (!isMatch && itemCategory == seedsCategory) {
                     isMatch = item.ItemId == coffeeItemId;
                 }
-                return isMatch && !(BetterJunimos.Config.JunimoImprovements.AvoidPlantingCoffee && item.ItemId == coffeeItemId);
-            });
+                if (!isMatch) continue;
+                if (avoidCoffee && item.ItemId == coffeeItemId) continue;
+                if (itemCategory == fertilizerCategory && item.ItemId == "805") continue;
+
+                found = true;
+                break;
+            }
+            hutItems[itemCategory] = found;
         }
     }
 }

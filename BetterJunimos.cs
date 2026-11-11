@@ -166,11 +166,6 @@ namespace BetterJunimos {
                     return;
                 }
             }
-
-            if (e.Button == Config.Other.SpawnJunimoKeybind) {
-                Monitor.Log($"spawn {e.Button} {Config.Other.SpawnJunimoKeybind}", LogLevel.Info);
-                SpawnJunimoCommand();
-            }
         }
 
 
@@ -226,7 +221,16 @@ namespace BetterJunimos {
             // caution: this runs after any chest is closed, not just Junimo huts
             if (e.OldMenu is not ItemGrabMenu menu || e.NewMenu is not null) return;
             if (menu.context is not (JunimoHut or Chest)) return;
-            if (menu.context is Chest chest && !chest.modData.ContainsKey(ModDataKeys.GetJunimoChestKey(ModManifest.UniqueID))) return;
+            if (menu.context is Chest chest) {
+                string chestKey = ModDataKeys.GetJunimoChestKey(ModManifest.UniqueID);
+                if (!chest.modData.ContainsKey(chestKey)) {
+                    if (Util.GetAllHuts().Any(h => ReferenceEquals(h.GetOutputChest(), chest))) {
+                        chest.modData[chestKey] = "true";
+                    } else {
+                        return;
+                    }
+                }
+            }
 
             CheckHutsForWagesAndProgressionItems();
             JunimoAbilities.ResetCooldowns();
@@ -284,10 +288,7 @@ namespace BetterJunimos {
             if (!junimoHuts.Any()) return;
 
             foreach (var hut in junimoHuts) {
-                // this might be getting called a bit too much
-                // but since OnMenuChanged doesn't tell us reliably which hut has changed
-                // it's safer to update items from all huts here
-                Util.Abilities.UpdateHutItems(Util.GetHutIdFromHut(hut));
+                var hutId = Util.GetHutIdFromHut(hut);
 
                 if (Config.JunimoPayment.WorkForWages) {
                     CheckForWages(hut);
@@ -297,7 +298,7 @@ namespace BetterJunimos {
                     CheckForProgressionItems(hut);
                 }
 
-                Util.Abilities.UpdateHutItems(Util.GetHutIdFromHut(hut));
+                Util.Abilities.UpdateHutItems(hutId);
             }
 
             if (!Config.JunimoPayment.WorkForWages) return;
@@ -317,6 +318,7 @@ namespace BetterJunimos {
         private void OnBuildingListChanged(object sender, BuildingListChangedEventArgs e) {
             foreach (Building building in e.Added) {
                 if (building is JunimoHut hut) {
+                    hut.GetOutputChest().modData[ModDataKeys.GetJunimoChestKey(ModManifest.UniqueID)] = "true";
                     Util.Abilities.UpdateHutItems(Util.GetHutIdFromHut(hut));
                 }
             }
@@ -550,11 +552,6 @@ namespace BetterJunimos {
                 "cfg.more-colorful-umbrellas.tooltip"
             );
             AddKeybind(
-                () => Config.Other.SpawnJunimoKeybind,
-                val => Config.Other.SpawnJunimoKeybind = val,
-                "cfg.spawn-junimo-keybind"
-            );
-            AddKeybind(
                 () => Config.Other.HutMenuKeybind,
                 val => Config.Other.HutMenuKeybind = val,
                 "cfg.hut-menu-keybind",
@@ -610,25 +607,6 @@ namespace BetterJunimos {
             if (Config.JunimoHuts.AvailableImmediately || (Config.JunimoHuts.AvailableAfterCommunityCenterComplete && Game1.MasterPlayer.mailReceived.Contains("ccIsComplete"))) {
                 Game1.player.hasMagicInk = true;
             }
-        }
-
-        private void SpawnJunimoCommand() {
-            var currentLocation = Game1.player.currentLocation;
-
-            // Allow spawning anywhere the player has a Junimo hut (farm, greenhouse,
-            // Ginger Island farm, modded farms, ...)
-            var junimoHuts = Util.GetAllFarms()
-                .Where(farm => farm.Equals(currentLocation))
-                .SelectMany(farm => farm.buildings.OfType<JunimoHut>())
-                .ToList();
-
-            if (!junimoHuts.Any()) {
-                Util.SendMessage(Helper.Translation.Get("msg.cannot-spawn-without-hut"));
-                return;
-            }
-
-            var hut = junimoHuts.ElementAt(Game1.random.Next(0, junimoHuts.Count));
-            Util.SpawnJunimoAtPosition(currentLocation, Game1.player.Position, hut, Game1.random.Next(4, 100));
         }
 
         private static void CheckForWages(JunimoHut hut) {

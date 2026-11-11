@@ -1,7 +1,5 @@
 {
   "msg.no-work-until-paid": "Junimos will not work until they are paid",
-  "msg.cannot-spawn-here": "Can only spawn Junimos on Farm or Greenhouse",
-  "msg.cannot-spawn-without-hut": "Build a Junimo hut before you spawn a Junimo",
   "msg.happy-with-payment": "Junimos are happy with their payment!",
   "msg.need-more-payment": "Junimos need more payment",
   "prompt.CanWorkInEvenings": "For {{qty}} {{item}}, the Junimos can work in the evening",
@@ -69,7 +67,6 @@
   "cfg.always-have-umbrellas.tooltip": "Junimos always have leaf umbrellas",
   "cfg.more-colorful-umbrellas": "More colorful umbrellas",
   "cfg.more-colorful-umbrellas.tooltip": "More Colorful Leaf Umbrellas",
-  "cfg.spawn-junimo-keybind": "Spawn Junimo keybind",
   "cfg.receive-messages": "Receive messages",
   "cfg.hut-menu-keybind": "Progression tracker keybind",
   "cfg.hut-menu-keybind.tooltip": "If set, you can open the progression tracker by pressing this key when the mouse is over a hut",

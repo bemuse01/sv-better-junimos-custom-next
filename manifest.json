@@ -1,7 +1,7 @@
 {
   "Name": "Better Junimos Custom Next",
   "Author": "hawkfalcon, ceruleandeep (Modified by bemuse01)",
-  "Version": "1.0.0",
+  "Version": "1.0.1",
   "Description": "원본 모드 Better Junimos(저자: hawkfalcon, ceruleandeep)를 수정하여 주니모 탐색 로직 개선 및 버그를 수정한 커스텀 모드입니다. (수정: bemuse01)",
   "UniqueID": "hawkfalcon.BetterJunimos",
   "EntryDll": "BetterJunimos.dll",

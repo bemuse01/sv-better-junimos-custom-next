@@ -57,6 +57,10 @@ namespace BetterJunimos.Patches {
                 return cached.foundWork;
             }
 
+            // Refresh hut chest item state once per scan cycle so newly added seeds/fertilizer
+            // are always recognized without requiring a separate hut click.
+            Util.Abilities.UpdateHutItems(id, hut);
+
             // SearchHutGrid manages hut.lastKnownCropLocation and Util.Abilities.lastKnownCropLocations
             var foundWork = SearchHutGrid(hut, radius, farm, id);
 

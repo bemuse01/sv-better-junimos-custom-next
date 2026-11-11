@@ -101,8 +101,10 @@ namespace BetterJunimos.Abilities {
             return false;
         }
 
+        private static readonly List<string> EmptyItems = new();
+
         public List<string> RequiredItems() {
-            return new();
+            return EmptyItems;
         }
 
         // adapted from GameLocation.checkAction

@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.0.1] - 2026-11-11
+
+### Fixed
+* **오두막 상자 아이템 즉시 인식 버그 수정**:
+  * 당일 건설한 오두막에 `"JunimoChest"` 태그가 누락되거나, 상자에 아이템을 넣는 순간 바닐라 `Chest.ShowMenu()` 호출로 인해 `ItemGrabMenu.context`가 `JunimoHut`에서 `Chest`로 변경되어 상자를 닫아도 씨앗/아이템이 인식되지 않던 문제를 해결했습니다 (`OnBuildingListChanged`에서 즉시 태그 부여 및 `OnMenuChanged`에서 오두막 상자 참조 직접 대조).
+  * `PatchSearchAroundHut`의 1초 주기 스캔 시 해당 오두막 상자의 아이템 보유 상태를 함께 갱신하도록 보강하여 별도 재클릭 없이 즉시 작업이 시작되도록 개선했습니다.
+
+### Changed
+* **상자 아이템 검사 및 능력 조회 CPU/메모리 최적화**:
+  * 모든 능력(`IJunimoAbility`)의 `RequiredItems()`가 매 호출마다 새 `List<string>`을 힙에 할당하지 않고 정적(static) 리스트를 재사용하도록 변경했습니다.
+  * `FertilizeAbility`가 모든 비료 아이템 ID를 개별 순회하던 구조를 카테고리(`-19`, 나무 비료 제외) 단일 검사로 통합하고, `JunimoAbilities.UpdateHutItems`의 LINQ 클로저/리스트 할당을 제거하여 CPU 및 GC 부담을 최소화했습니다.
+
+### Removed
+* **주니모 수동 소환 기능 (`J` 키, `SpawnJunimoKeybind`) 전면 삭제**:
+  * 구버전 스폰 버그 우회용으로 존재하던 수동 소환 단축키 설정, 이벤트 핸들러 및 번역 키를 제거했습니다.
+
+---
+
 ## [1.0.0] - 2026-11-11
 
 ### Changed

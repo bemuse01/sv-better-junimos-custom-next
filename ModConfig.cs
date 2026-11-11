@@ -58,7 +58,6 @@ namespace BetterJunimos {
         public OtherSettings Other { get; set; } = new();
 
         internal class OtherSettings {
-            public SButton SpawnJunimoKeybind { get; set; } = SButton.J;
             public bool ReceiveMessages { get; set; } = true;
             public bool HutClickEnabled { get; set; } = true;
             public SButton HutMenuKeybind { get; set; } = SButton.None;

@@ -44,8 +44,10 @@ namespace BetterJunimos.Abilities {
             return true;
         }
 
+        private static readonly List<string> EmptyItems = new();
+
         public List<string> RequiredItems() {
-            return new();
+            return EmptyItems;
         }
 
         private bool ShouldAvoidHarvesting(Vector2 pos, HoeDirt hd) {

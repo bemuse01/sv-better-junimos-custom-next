@@ -34,8 +34,10 @@ namespace BetterJunimos.Abilities {
             return true;
         }
 
+        private static readonly List<string> EmptyItems = new();
+
         public List<string> RequiredItems() {
-            return new List<string>();
+            return EmptyItems;
         }
     }
 }

@@ -12,7 +12,7 @@ namespace BetterJunimos.Abilities {
     public class FertilizeAbility : IJunimoAbility {
         private const int ItemCategory = SObject.fertilizerCategory;
         private const string TreeFertilizer = "805";
-        private List<string> _RequiredItems;
+        private static readonly List<string> RequiredFertilizerItems = new() { ItemCategory.ToString() };
 
         public string AbilityName() {
             return "Fertilize";
@@ -40,13 +40,7 @@ namespace BetterJunimos.Abilities {
         }
 
         public List<string> RequiredItems() {
-            // this is heavy, cache it
-            if (_RequiredItems is not null) return _RequiredItems;
-            var fertilizers = Game1.objectData.Where(pair => 
-                pair.Value.Category == StardewValley.Object.fertilizerCategory && pair.Key != TreeFertilizer);
-            _RequiredItems = (from kvp in fertilizers select kvp.Key).ToList();
-
-            return _RequiredItems;
+            return RequiredFertilizerItems;
         }
 
         private static void Fertilize(GameLocation location, Vector2 pos, Item fertilizerItem) {

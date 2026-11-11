@@ -13,7 +13,6 @@ using SObject = StardewValley.Object;
 
 namespace BetterJunimos.Abilities {
     public class PlantCropsAbility : IJunimoAbility {
-        int ItemCategory = SObject.SeedsCategory;
         private readonly IMonitor Monitor;
 
         private const string SunflowerSeeds = "431";
@@ -145,8 +144,10 @@ namespace BetterJunimos.Abilities {
             return isCropSeed;
         }
 
+        private static readonly List<string> RequiredSeedItems = new() { SObject.SeedsCategory.ToString() };
+
         public List<string> RequiredItems() {
-            return new List<string> { ItemCategory.ToString() };
+            return RequiredSeedItems;
         }
 
         private bool Plant(GameLocation location, Vector2 pos, string index) {

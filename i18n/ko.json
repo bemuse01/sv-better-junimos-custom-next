@@ -1,7 +1,5 @@
 {
   "msg.no-work-until-paid": "주니모들은 지불할 때까지 작동하지 않습니다.",
-  "msg.cannot-spawn-here": "농장에서만 주니모를 생성할 수 있습니다.",
-  "msg.cannot-spawn-without-hut": "주니모를 생성하기 전에 주니모 오두막을 만드십시오.",
   "msg.happy-with-payment": "주니모들은 지불에 만족합니다!",
   
   "prompt.CanWorkInEvenings": "{{qty}} {{item}}의 경우, 주니모들은 저녁에 일할 수 있습니다.",
@@ -60,7 +58,6 @@
   "cfg.always-have-umbrellas.tooltip": "주니모들은 항상 잎 우산을 가지고 있습니다.",
   "cfg.more-colorful-umbrellas": "더 다체로운 우산",
   "cfg.more-colorful-umbrellas.tooltip": "더 다채로운 잎 우산",
-  "cfg.spawn-junimo-keybind": "주니모 단축기 활성화",
   "cfg.receive-messages": "메세지 수신",
   
   "tracker.tracker-title": "주니모 진행 추적기: {{percentage}}%^^퀘스트:^{{quests}}^^스포일러/문제 해결:^{{details}}",
