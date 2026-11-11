@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.7] - 2026-11-12
+
+### Fixed
+* **4번째 이상 주니모(`junimoNumber >= 3`) 스폰 시 중도 소멸(`destroy = true`) 및 잔여 타일 누락 버그 수정**:
+  * 바닐라 `JunimoHarvester` 생성자가 0~2번 주니모만 처리하고 3번(4번째) 이상 주니모에 대해 무작위 길찾기를 시도하다 실패 시 `destroy = true`를 설정하던 문제를 방지하기 위해, 스폰 시점(`Util.SpawnJunimoAtPosition`)에 농장 여부를 불문하고 `destroy = false`로 초기화하고 생성자 내부의 불필요한 무작위 길찾기를 건너뛰도록 수정했습니다.
+* **스폰 직후 무작위 배회(`pathfindToRandomSpotAroundHut`)로 인한 구역 이탈 방지**:
+  * 스폰 직후 `pathfindToNewCrop()` 호출 시 남은 작업이 없어 귀가(`SendJunimoHome`)가 결정된 경우, `pathfindToRandomSpotAroundHut()`가 덮어써져 밭 외곽 통로나 인접 구역 경계로 배회하던 현상을 제거했습니다.
+  * `noHarvest` 모드에서 무작위 배회를 할 때도 경작지(`HoeDirt`) 타일을 우선 선택하도록 개선했습니다.
+* **타일 예약 판정(`IsTileClaimedByOtherJunimo`) 정밀화**:
+  * 귀가 중이거나 소멸 중인 주니모가 지나가는 타일이 예약된 타일로 오인되지 않도록 명시적 작업 할당(`AssignedTargets`) 기준으로만 타일 점유를 판정하고, 귀가·개체수 축소 시 즉시 예약을 해제하도록 개선했습니다.
+
+---
+
 ## [1.0.6] - 2026-11-11
 
 ### Changed

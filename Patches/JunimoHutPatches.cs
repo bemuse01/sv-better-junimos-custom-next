@@ -214,6 +214,7 @@ namespace BetterJunimos.Patches {
                 hut.myJunimos.RemoveAll(junimo => junimo is null || !IsJunimoAliveAndHomed(junimo));
                 while (hut.myJunimos.Count > maxJunimos) {
                     var excess = hut.myJunimos[hut.myJunimos.Count - 1];
+                    Util.ClearTarget(excess);
                     excess.junimoReachedHut(excess, excess.currentLocation);
                     hut.myJunimos.RemoveAt(hut.myJunimos.Count - 1);
                 }

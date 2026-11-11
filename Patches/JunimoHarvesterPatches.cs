@@ -10,6 +10,7 @@ using BetterJunimos.Abilities;
 using StardewModdingAPI;
 using StardewValley.Buildings;
 using StardewValley.Pathfinding;
+using StardewValley.TerrainFeatures;
 using SObject = StardewValley.Object;
 
 namespace BetterJunimos.Patches {
@@ -157,13 +158,17 @@ namespace BetterJunimos.Patches {
             var hut = Util.GetHutFromId(__instance.HomeId);
             if (hut is null) return false;
 
+            // Skip premature random pathfinding called inside the vanilla JunimoHarvester constructor
+            // (for junimoNumber >= 3) before SpawnJunimoAtPosition registers the Junimo and assigns real work.
+            if (!hut.myJunimos.Contains(__instance)) return false;
+
             Util.ClearTarget(__instance);
             var radius = Util.CurrentWorkingRadius;
             var retry = 0;
             do {
                 var endPoint = __instance.currentLocation.IsGreenhouse
                     ? EndPointInGreenhouse(__instance)
-                    : EndPointInFarm(hut, radius);
+                    : EndPointInFarm(__instance.currentLocation, hut, radius);
 
                 __instance.controller = new PathFindController(__instance, __instance.currentLocation, endPoint, -1, __instance.reachFirstDestinationFromHut, 1000);
                 retry++;
@@ -178,12 +183,13 @@ namespace BetterJunimos.Patches {
             return new Vector2(gw / 2 + Game1.random.Next(-(gw / 2 + 2), gh / 2 - 2), gh / 2 + Game1.random.Next(-(gw / 2 + 2), gh / 2 - 2)).ToPoint();
         }
 
-        private static Point EndPointInFarm(JunimoHut hut, int radius) {
+        private static Point EndPointInFarm(GameLocation location, JunimoHut hut, int radius) {
             var (minX, maxX, minY, maxY) = Util.GetHutRadiusBounds(hut, radius);
-            for (int i = 0; i < 10; ++i) {
+            for (int i = 0; i < 15; ++i) {
                 int x = Game1.random.Next(minX, maxX + 1);
                 int y = Game1.random.Next(minY, maxY + 1);
-                if (!hut.occupiesTile(new Vector2(x, y))) {
+                var vec = new Vector2(x, y);
+                if (!hut.occupiesTile(vec) && location.terrainFeatures.TryGetValue(vec, out var tf) && tf is HoeDirt) {
                     return new Point(x, y);
                 }
             }
@@ -242,6 +248,7 @@ namespace BetterJunimos.Patches {
         }
 
         private static void SendJunimoHome(JunimoHarvester junimo, JunimoHut hut) {
+            Util.ClearTarget(junimo);
             if (junimo.currentLocation.NameOrUniqueName == hut.GetParentLocation().NameOrUniqueName) {
                 junimo.returnToJunimoHut(junimo.currentLocation);
             } else if (junimo.currentLocation.IsGreenhouse) {

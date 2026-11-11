@@ -169,7 +169,7 @@ namespace BetterJunimos.Utils {
                 if (character is not JunimoHarvester other || other == me) continue;
                 if (other.currentLocation != location) continue;
 
-                // 1. Check explicitly assigned target if the other Junimo is still moving or standing on it
+                // Check explicitly assigned target if the other Junimo is still moving to it or standing on it working
                 if (AssignedTargets.TryGetValue(other, out var assigned) && assigned.location == location) {
                     bool stillActiveOnTarget = other.controller != null ||
                                                (other.TilePoint.X == assigned.target.X && other.TilePoint.Y == assigned.target.Y);
@@ -178,22 +178,6 @@ namespace BetterJunimos.Utils {
                     } else {
                         AssignedTargets.Remove(other);
                     }
-                }
-
-                // 2. Check active pathfinding endpoint
-                if (other.controller?.pathToEndPoint is { Count: > 0 } path) {
-                    Point target = other.controller.endPoint;
-                    if (target == Point.Zero) {
-                        target = path.Last();
-                    }
-                    if (target.X == x && target.Y == y) {
-                        return true;
-                    }
-                }
-
-                // 3. Check if the other Junimo is already standing on that tile working
-                if (other.controller == null && other.TilePoint.X == x && other.TilePoint.Y == y) {
-                    return true;
                 }
             }
 
@@ -350,10 +334,11 @@ namespace BetterJunimos.Utils {
 
             var junimoHarvester = new JunimoHarvester(location, pos, hut, junimoNumber, gemColor);
 
-            // the JunimoHarvester constructor sets the location to Farm and calls pathfindToRandomSpotAroundHut immediately
-            // so we have to set the location explicitly then re-do pathfinding
+            // Vanilla's JunimoHarvester constructor only handles junimoNumber 0..2 in its switch statement;
+            // for junimoNumber >= 3 (4th+ Junimo) or non-Farm locations, it can leave destroy = true.
+            // Always clear destroy and ensure location/position are set before assigning work.
+            Reflection.GetField<bool>(junimoHarvester, "destroy").SetValue(false);
             if (!location.Equals(Game1.getFarm())) {
-                Reflection.GetField<bool>(junimoHarvester, "destroy").SetValue(false);
                 junimoHarvester.currentLocation = location;
                 junimoHarvester.Position = pos;
             }
@@ -363,11 +348,8 @@ namespace BetterJunimos.Utils {
             hut.myJunimos.Add(junimoHarvester);
             junimoHarvester.HomeId = Util.GetHutIdFromHut(hut);
 
-            // Immediately direct the newly spawned Junimo to its closest unclaimed work tile
+            // Immediately direct the newly spawned Junimo to its closest unclaimed work tile (or back home if none)
             junimoHarvester.pathfindToNewCrop();
-            if (junimoHarvester.controller?.pathToEndPoint == null) {
-                junimoHarvester.pathfindToRandomSpotAroundHut();
-            }
 
             if (Game1.isRaining) {
                 var alpha = Reflection.GetField<float>(junimoHarvester, "alpha");
