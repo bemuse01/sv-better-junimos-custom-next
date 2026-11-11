@@ -23,4 +23,4 @@
 ## 크레딧 (Credits)
 * **원본 모드 (Original Mod)**: [Better Junimos](https://www.nexusmods.com/stardewvalley/mods/2221) by **hawkfalcon** & **ceruleandeep**
 * **커스텀 수정 (Modified by)**: **bemuse01** (with **Gemini**)
-  > *"이 프로젝트는 99%의 Gemini의 코딩 능력과 1%의 나의 지시로 인해 만들어졌습니다."*
+  > *"본 프로젝트는 Gemini의 코딩 역량 99%에 개발자(bemuse01)의 기획 및 지시 1%를 더해 완성되었습니다."*
