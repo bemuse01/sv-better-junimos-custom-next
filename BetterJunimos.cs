@@ -77,7 +77,7 @@ namespace BetterJunimos {
         }
 
         private void DoHarmonyRegistration() {
-            var harmony = new Harmony("com.hawkfalcon.BetterJunimos");
+            var harmony = new Harmony(ModManifest.UniqueID);
             // Thank you to Cat (danvolchek) for this harmony setup implementation
             // https://github.com/danvolchek/StardewMods/blob/master/BetterGardenPots/BetterGardenPots/BetterGardenPotsMod.cs#L29
             IList<Tuple<string, Type, Type>> replacements = new List<Tuple<string, Type, Type>>();

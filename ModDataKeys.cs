@@ -4,7 +4,7 @@ namespace BetterJunimos {
     /// </summary>
     internal static class ModDataKeys {
         // Mod unique ID prefix
-        private const string ModPrefix = "hawkfalcon.BetterJunimos";
+        private const string ModPrefix = "bemuse01.BetterJunimosCustomNext";
 
         // Chest identification
         public const string JunimoChestMarker = "JunimoChest";

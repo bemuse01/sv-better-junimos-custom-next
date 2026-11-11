@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.6] - 2026-11-11
+
+### Changed
+* **모드 고유 식별자(`UniqueID`) 변경**:
+  * SMAPI가 원본 모드(`hawkfalcon.BetterJunimos`, Nexus `2221`)로 인식하여 불필요한 업데이트 알림을 표시하던 문제를 방지하기 위해 `manifest.json`의 `UniqueID`를 `bemuse01.BetterJunimosCustomNext`로 변경했습니다.
+
+---
+
 ## [1.0.5] - 2026-11-11
 
 ### Added
