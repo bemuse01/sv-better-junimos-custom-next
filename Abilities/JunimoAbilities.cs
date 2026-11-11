@@ -72,7 +72,7 @@ namespace BetterJunimos.Utils {
         }
 
         /*
-         * Add an IJunimoAbility to the list of possible actions if allowed
+         * Add an IJunimoAbility to the list of possible actions
          */
         public void RegisterJunimoAbility(IJunimoAbility junimoAbility) {
             var name = junimoAbility.AbilityName();
@@ -80,21 +80,10 @@ namespace BetterJunimos.Utils {
                 BetterJunimos.Config.JunimoAbilities.Add(name, true);
             }
 
-            if (!BetterJunimos.Config.JunimoAbilities[name]) {
-                return;
+            if (!_registeredJunimoAbilities.Any(a => a.AbilityName() == name)) {
+                _registeredJunimoAbilities.Add(junimoAbility);
             }
-
-            _registeredJunimoAbilities.Add(junimoAbility);
             _requiredItems.UnionWith(junimoAbility.RequiredItems());
-
-            // add placeholder for ability in progressions system
-            if (Util.Progression.UnlockCosts is null) {
-                return;
-            }
-
-            if (!Util.Progression.UnlockCosts.ContainsKey(name)) {
-                Util.Progression.UnlockCosts[name] = new UnlockCost { Item = "268", Stack = 1, Remarks = "Starfruit" };
-            }
         }
 
         // Can the Junimo use a capability/ability here
@@ -104,17 +93,15 @@ namespace BetterJunimos.Utils {
 
         public IJunimoAbility IdentifyJunimoAbility(GameLocation location, Vector2 pos, Guid hutGuid) {
             foreach (var ability in _registeredJunimoAbilities) {
-                // TODO: cooldowns for greenhouse
+                if (BetterJunimos.Config.JunimoAbilities.TryGetValue(ability.AbilityName(), out bool enabled) && !enabled) {
+                    continue;
+                }
                 if (ActionCoolingDown(location, ability, pos)) continue;
                 if (!ItemInHut(hutGuid, ability.RequiredItems())) {
                     continue;
                 }
 
                 if (!ability.IsActionAvailable(location, pos, hutGuid)) {
-                    continue;
-                }
-
-                if (!Util.Progression.CanUseAbility(ability)) {
                     continue;
                 }
 

@@ -208,7 +208,7 @@ namespace BetterJunimos.Patches {
 
         internal static void TrySpawnJunimo(JunimoHut hut) {
             if (!Context.IsMainPlayer) return;
-            var maxJunimos = Util.Progression.MaxJunimosUnlocked;
+            var maxJunimos = BetterJunimos.Config.JunimoHuts.MaxJunimos;
             if (maxJunimos < 0) maxJunimos = 0;
 
             // prune junimos that can no longer work (orphaned when their hut
@@ -229,14 +229,14 @@ namespace BetterJunimos.Patches {
             if (_lastSpawnTick.TryGetValue(hut, out var lastSpawn) && Game1.ticks - lastSpawn < SpawnCooldownTicks) return;
 
             // Don't start new work after quitting time
-            var quittingTime = Util.Progression.CanWorkInEvenings ? 2400 : 1900;
+            var quittingTime = BetterJunimos.Config.JunimoImprovements.CanWorkInEvenings ? 2400 : 1900;
             if (Game1.timeOfDay > quittingTime) return;
 
             // Winter
-            if (hut.GetParentLocation().IsWinterHere() && !Util.Progression.CanWorkInWinter) return;
+            if (hut.GetParentLocation().IsWinterHere() && !BetterJunimos.Config.JunimoImprovements.CanWorkInWinter) return;
 
             // Rain
-            if (hut.GetParentLocation().IsRainingHere() && !Util.Progression.CanWorkInRain) return;
+            if (hut.GetParentLocation().IsRainingHere() && !BetterJunimos.Config.JunimoImprovements.CanWorkInRain) return;
 
             // Don't spawn during a farm event on the farm (vanilla behaviour)
             if (hut.GetParentLocation().NameOrUniqueName == "Farm" && Game1.farmEvent != null) return;
@@ -334,7 +334,7 @@ namespace BetterJunimos.Patches {
     internal class ReplaceJunimoHutNumber {
         public static bool Prefix(JunimoHut __instance, ref int __result) {
             if (!Context.IsMainPlayer) return true;
-            for (var index = 0; index < Util.Progression.MaxJunimosUnlocked; ++index) {
+            for (var index = 0; index < BetterJunimos.Config.JunimoHuts.MaxJunimos; ++index) {
                 if (index >= __instance.myJunimos.Count) {
                     __result = index;
                     return false;

@@ -19,16 +19,12 @@ namespace BetterJunimos.Abilities {
             //if (!location.IsFarm) return false;
             var hut = Util.GetHutFromId(guid);
             var (x, y) = pos;
-            var up = new Vector2(x, y + 1);
-            var right = new Vector2(x + 1, y);
-            var down = new Vector2(x, y - 1);
-            var left = new Vector2(x - 1, y);
-
-            Vector2[] positions = { up, right, down, left };
-            var greenhouses = positions.Select(nextPos => JunimoGreenhouse.GreenhouseBuildingAtPos(location, nextPos));
-            if (!greenhouses.Any(greenhouseBuilding => greenhouseBuilding is not null)) return false;
-            var greenhouse = greenhouses.FirstOrDefault(greenhouseBuilding => greenhouseBuilding is not null);
-            if (greenhouse.characters.Count(npc => npc is JunimoHarvester) >= Util.Progression.BaseMaxJunimos) {
+            var greenhouse = JunimoGreenhouse.GreenhouseBuildingAtPos(location, new Vector2(x, y + 1))
+                             ?? JunimoGreenhouse.GreenhouseBuildingAtPos(location, new Vector2(x + 1, y))
+                             ?? JunimoGreenhouse.GreenhouseBuildingAtPos(location, new Vector2(x, y - 1))
+                             ?? JunimoGreenhouse.GreenhouseBuildingAtPos(location, new Vector2(x - 1, y));
+            if (greenhouse is null) return false;
+            if (greenhouse.characters.Count(npc => npc is JunimoHarvester) >= BetterJunimos.Config.JunimoHuts.MaxJunimos) {
                 // greenhouse already kinda full
                 return false;
             }

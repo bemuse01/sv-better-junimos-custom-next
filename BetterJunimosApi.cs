@@ -30,7 +30,7 @@ namespace BetterJunimos {
         }
 
         public int GetJunimoHutMaxJunimos() {
-            return Util.Progression.MaxJunimosUnlocked;
+            return BetterJunimos.Config.JunimoHuts.MaxJunimos;
         }
 
         public Dictionary<string, bool> GetJunimoAbilities() {
@@ -46,7 +46,7 @@ namespace BetterJunimos {
         }
 
         public void ShowPerfectionTracker() {
-            Util.Progression.ShowPerfectionTracker();
+            // Skills progression has been removed; kept as no-op for external API compatibility
         }
 
         public void ShowConfigurationMenu() {

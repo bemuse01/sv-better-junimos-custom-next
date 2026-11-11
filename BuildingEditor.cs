@@ -18,7 +18,7 @@ namespace BetterJunimos {
                         junimoHut.BuildCost = 0;
                         junimoHut.BuildMaterials.Clear();
                         BetterJunimos.SMonitor.Log($"Edited Junimo Huts to cost ${junimoHut.BuildCost} and no materials", LogLevel.Debug);
-                    } else if (Util.Progression.ReducedCostToConstruct) {
+                    } else if (BetterJunimos.Config.JunimoHuts.ReducedCostToConstruct) {
                         junimoHut.BuildCost = 10000;
                         junimoHut.BuildMaterials.Clear();
 

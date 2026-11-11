@@ -208,11 +208,10 @@ namespace BetterJunimos.Patches {
 
             Util.ClearTarget(__instance);
 
-            var quittingTime = Util.Progression.CanWorkInEvenings ? 2400 : 1900;
+            var quittingTime = BetterJunimos.Config.JunimoImprovements.CanWorkInEvenings ? 2400 : 1900;
 
             if (Game1.timeOfDay > quittingTime) {
                 // bedtime, all Junimos return to huts and/or despawn
-                Util.Progression.PromptForCanWorkInEvenings();
                 if (__instance.controller != null) return false;
                 SendJunimoHome(__instance, hut);
                 return false;

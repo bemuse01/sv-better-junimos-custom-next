@@ -12,7 +12,6 @@ using StardewValley.Characters;
 using StardewValley.Menus;
 using BetterJunimos.Utils;
 using StardewValley.Objects;
-using static StardewValley.Menus.CarpenterMenu;
 
 namespace BetterJunimos {
     public class BetterJunimos : Mod {
@@ -44,7 +43,6 @@ namespace BetterJunimos {
             helper.Events.Content.AssetRequested += JunimoEditor.OnAssetRequested;
 
             helper.Events.GameLoop.OneSecondUpdateTicked += Util.Progression.ConfigureFromWizard;
-            helper.Events.Input.ButtonPressed += OnButtonPressed;
             helper.Events.Display.MenuChanged += OnMenuChanged;
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
@@ -57,9 +55,6 @@ namespace BetterJunimos {
             helper.ConsoleCommands.Add("bj_list_huts", "List available huts", ListHuts);
             helper.ConsoleCommands.Add("bj_list_actions", "List available actions", ListActions);
             helper.ConsoleCommands.Add("bj_list_abilities", "List configurable abilities", ListConfigurableAbilities);
-            helper.ConsoleCommands.Add("bj_prompt_all", "Prompt all quests", PromptAllQuests);
-            helper.ConsoleCommands.Add("bj_prompt", "Prompt a quest", PromptQuest);
-            helper.ConsoleCommands.Add("bj_unlock", "Unlock a quest", UnlockQuest);
             helper.ConsoleCommands.Add("bj_list_cooldowns", "List cooldowns", ListCooldowns);
             helper.ConsoleCommands.Add("bj_reset_cooldowns", "Reset cooldowns", ResetCooldowns);
         }
@@ -74,18 +69,6 @@ namespace BetterJunimos {
 
         private void ListConfigurableAbilities(string command, string[] args) {
             Util.Progression.ListConfigurableAbilities();
-        }
-
-        private void PromptAllQuests(string command, string[] args) {
-            Util.Progression.PromptAllQuests();
-        }
-
-        private void PromptQuest(string command, string[] args) {
-            Util.Progression.SetPrompted(args[0]);
-        }
-
-        private void UnlockQuest(string command, string[] args) {
-            Util.Progression.SetUnlocked(args[0]);
         }
 
         private void ListCooldowns(string command, string[] args) {
@@ -145,65 +128,6 @@ namespace BetterJunimos {
             }
         }
 
-        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OnButtonPressed(object sender, ButtonPressedEventArgs e) {
-            if (!Context.IsWorldReady) {
-                return;
-            }
-
-            if (e.Button.IsUseToolButton() && Config.Other.HutClickEnabled) {
-                if (!AlternativeTexturesActive() && ShowPerfectionTracker(e)) {
-                    Helper.Input.Suppress(e.Button);
-                    return;
-                }
-            }
-
-            if (e.Button == Config.Other.HutMenuKeybind) {
-                if (ShowPerfectionTracker(e)) {
-                    Helper.Input.Suppress(e.Button);
-                    return;
-                }
-            }
-        }
-
-
-        private const string PAINT_BUCKET_FLAG = "AlternativeTextures.PaintBucketFlag";
-        private const string PAINT_BRUSH_FLAG = "AlternativeTextures.PaintBrushFlag";
-        private const string SCISSORS_FLAG = "AlternativeTextures.ScissorsFlag";
-
-        private static bool AlternativeTexturesActive() {
-            // make sure Alternative Textures still works
-            if (Game1.player.CurrentTool is null) return false;
-
-            string[] flags = { PAINT_BUCKET_FLAG, PAINT_BRUSH_FLAG, SCISSORS_FLAG };
-            return flags.Any(flag => Game1.player.CurrentTool.modData.ContainsKey(flag));
-        }
-
-        private bool ShowPerfectionTracker(ButtonPressedEventArgs e) {
-            if (!Game1.player.currentLocation.IsFarm) return false;
-            if (Game1.activeClickableMenu != null) return false;
-
-            // Use the same tile the game would act on (mirrors Game1.pressActionButton):
-            // the cursor tile when the mouse cursor is visible and near the player,
-            // otherwise the tile in front of the player. The old code used the raw
-            // cursor tile, which on mobile/gamepad could point at a stale cursor
-            // position (e.g. over a hut while pressing the action button far away),
-            // making the tracker pop up when clicking unrelated things.
-            var tile = Game1.currentCursorTile;
-            if (!Game1.wasMouseVisibleThisFrame || Game1.mouseCursorTransparency == 0f ||
-                !Utility.tileWithinRadiusOfPlayer((int)tile.X, (int)tile.Y, 1, Game1.player)) {
-                tile = Game1.player.GetGrabTile();
-            }
-
-            if (!JunimoProgression.HutOnTile(tile)) return false;
-            if (Helper.ModRegistry.Get("ceruleandeep.BetterJunimosForestry") != null) return false;
-
-            Util.Progression.ShowPerfectionTracker();
-            return true;
-        }
-
         /// <summary>Raised after a the game is saved</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
@@ -232,7 +156,7 @@ namespace BetterJunimos {
                 }
             }
 
-            CheckHutsForWagesAndProgressionItems();
+            CheckHutsForWages();
             JunimoAbilities.ResetCooldowns();
             // chest contents changed, the cached work search may be out of date
             Patches.PatchSearchAroundHut.InvalidateCache();
@@ -255,8 +179,7 @@ namespace BetterJunimos {
             }
 
             if (huts.Any()) {
-                CheckHutsForWagesAndProgressionItems();
-                Util.Progression.DayStartedProgressionPrompt(Game1.IsWinter, Game1.isRaining);
+                CheckHutsForWages();
                 JunimoAbilities.ResetCooldowns();
             }
 
@@ -281,7 +204,7 @@ namespace BetterJunimos {
             SaveConfig();
         }
 
-        private void CheckHutsForWagesAndProgressionItems() {
+        private void CheckHutsForWages() {
             var alreadyPaid = Util.Payments.WereJunimosPaidToday;
 
             var junimoHuts = Util.GetAllHuts();
@@ -294,11 +217,7 @@ namespace BetterJunimos {
                     CheckForWages(hut);
                 }
 
-                if (Config.Progression.Enabled) {
-                    CheckForProgressionItems(hut);
-                }
-
-                Util.Abilities.UpdateHutItems(hutId);
+                Util.Abilities.UpdateHutItems(hutId, hut);
             }
 
             if (!Config.JunimoPayment.WorkForWages) return;
@@ -319,7 +238,7 @@ namespace BetterJunimos {
             foreach (Building building in e.Added) {
                 if (building is JunimoHut hut) {
                     hut.GetOutputChest().modData[ModDataKeys.GetJunimoChestKey(ModManifest.UniqueID)] = "true";
-                    Util.Abilities.UpdateHutItems(Util.GetHutIdFromHut(hut));
+                    Util.Abilities.UpdateHutItems(Util.GetHutIdFromHut(hut), hut);
                 }
             }
 
@@ -334,46 +253,36 @@ namespace BetterJunimos {
         private void OnSaveLoaded(object sender, EventArgs e) {
             AllowJunimoHutPurchasing();
 
-            // make sure crop harvesting is on for everyone
-            var farm = Game1.getFarm();
-            farm.modData[ModDataKeys.HarvestCropsUnlockedKey] = "1";
-
             // rebuild the GMCM menu now we know who's host/farmhand
             SetupGenericModConfigMenu();
 
             if (!Context.IsMainPlayer) return;
 
-            // check for old progression data stored in the save, migrate it
-            MigrateProgressionData();
-
             // load crop maps from save (TODO: not MP-safe)
             CropMaps = Helper.Data.ReadSaveData<Maps>(ModDataKeys.CropMapsSaveKey) ?? new Maps();
-        }
-
-        // copy any progress made from the SaveData into modData
-        private void MigrateProgressionData() {
-            var pd = Helper.Data.ReadSaveData<ProgressionData>(ModDataKeys.ProgressionDataSaveKey);
-            if (pd?.Progress is null) return;
-            var farm = Game1.getFarm();
-            foreach (var (key, value) in pd.Progress) {
-                if (value.Prompted) farm.modData[ModDataKeys.GetPromptedKey(key)] = "1";
-                if (value.Unlocked) farm.modData[ModDataKeys.GetUnlockedKey(key)] = "1";
-            }
         }
 
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e) {
             ContentPatcherAPI = Helper.ModRegistry.GetApi<IContentPatcherAPI>("Pathoschild.ContentPatcher");
 
-            SetupGenericModConfigMenu();
-
             // only register after the game is launched so we can query the object registry
             Util.Abilities.RegisterDefaultAbilities();
+
+            SetupGenericModConfigMenu();
 
             // write the config file again to populate JunimoAbilities with registered abilities
             SaveConfig();
 
             // register GMCM token
             Util.Progression.SetupHutsToken();
+        }
+
+        private static bool GetAbilityEnabled(string abilityName) {
+            return !Config.JunimoAbilities.TryGetValue(abilityName, out bool enabled) || enabled;
+        }
+
+        private static void SetAbilityEnabled(string abilityName, bool enabled) {
+            Config.JunimoAbilities[abilityName] = enabled;
         }
 
         private void SetupGenericModConfigMenu() {
@@ -384,6 +293,7 @@ namespace BetterJunimos {
             configMenu.Register(ModManifest, () => Config = new ModConfig(), SaveConfig);
             configMenu.SetTitleScreenOnlyForNextOptions(ModManifest, false);
 
+            // 1. Hut Settings
             configMenu.AddSectionTitle(ModManifest,
                 () => Helper.Translation.Get("cfg.hut-settings"));
 
@@ -422,15 +332,11 @@ namespace BetterJunimos {
                 "cfg.free"
             );
 
+            // 2. Work Conditions & Abilities
             configMenu.AddSectionTitle(ModManifest,
                 () => Helper.Translation.Get("cfg.improvements"),
                 () => ""
             );
-            AddBoolOption(
-                () => Config.Progression.Enabled,
-                val => Config.Progression.Enabled = val,
-                "cfg.skills-progression",
-                "cfg.skills-progression.tooltip");
             AddHostBoolOption(
                 () => Config.JunimoImprovements.CanWorkInRain,
                 val => Config.JunimoImprovements.CanWorkInRain = val,
@@ -448,11 +354,61 @@ namespace BetterJunimos {
             );
             AddHostBoolOption(
                 () => Config.JunimoImprovements.CanWorkInGreenhouse,
-                val => Config.JunimoImprovements.CanWorkInGreenhouse = val,
+                val => {
+                    Config.JunimoImprovements.CanWorkInGreenhouse = val;
+                    SetAbilityEnabled("VisitGreenhouse", val);
+                },
                 "cfg.can-work-in-greenhouse",
                 "cfg.can-work-in-greenhouse.tooltip"
             );
+            AddHostBoolOption(
+                () => GetAbilityEnabled("HarvestCrops"),
+                val => SetAbilityEnabled("HarvestCrops", val),
+                "cfg.ability.harvest-crops",
+                "cfg.ability.harvest-crops.tooltip"
+            );
+            AddHostBoolOption(
+                () => GetAbilityEnabled("PlantCrops"),
+                val => SetAbilityEnabled("PlantCrops", val),
+                "cfg.ability.plant-crops",
+                "cfg.ability.plant-crops.tooltip"
+            );
+            AddHostBoolOption(
+                () => GetAbilityEnabled("Fertilize"),
+                val => SetAbilityEnabled("Fertilize", val),
+                "cfg.ability.fertilize",
+                "cfg.ability.fertilize.tooltip"
+            );
+            AddHostBoolOption(
+                () => GetAbilityEnabled("Water"),
+                val => SetAbilityEnabled("Water", val),
+                "cfg.ability.water",
+                "cfg.ability.water.tooltip"
+            );
+            AddHostBoolOption(
+                () => GetAbilityEnabled("ClearDeadCrops"),
+                val => SetAbilityEnabled("ClearDeadCrops", val),
+                "cfg.ability.clear-dead-crops",
+                "cfg.ability.clear-dead-crops.tooltip"
+            );
+            AddHostBoolOption(
+                () => GetAbilityEnabled("HarvestBushes"),
+                val => SetAbilityEnabled("HarvestBushes", val),
+                "cfg.ability.harvest-bushes",
+                "cfg.ability.harvest-bushes.tooltip"
+            );
+            AddHostBoolOption(
+                () => GetAbilityEnabled("HarvestForageCrops"),
+                val => SetAbilityEnabled("HarvestForageCrops", val),
+                "cfg.ability.harvest-forage-crops",
+                "cfg.ability.harvest-forage-crops.tooltip"
+            );
 
+            // 3. Harvest & Planting Detailed Options (Separated Category)
+            configMenu.AddSectionTitle(ModManifest,
+                () => Helper.Translation.Get("cfg.harvest-planting-options"),
+                () => ""
+            );
             AddHostBoolOption(
                 () => Config.JunimoImprovements.AvoidHarvestingFlowers,
                 val => Config.JunimoImprovements.AvoidHarvestingFlowers = val,
@@ -487,6 +443,7 @@ namespace BetterJunimos {
                 "cfg.plant-mixed-seeds.tooltip"
             );
 
+            // 4. Payment
             configMenu.AddSectionTitle(ModManifest,
                 () => Helper.Translation.Get("cfg.payment"),
                 () => "");
@@ -520,7 +477,7 @@ namespace BetterJunimos {
                 "cfg.wine",
                 0, 20
             );
-            
+
             AddHostBoolOption(
                 () => Config.JunimoPayment.GiveExperience,
                 val => Config.JunimoPayment.GiveExperience = val,
@@ -528,6 +485,7 @@ namespace BetterJunimos {
                 "cfg.give-experience.tooltip"
             );
 
+            // 5. Other
             configMenu.AddSectionTitle(ModManifest,
                 () => Helper.Translation.Get("cfg.other"),
                 () => "");
@@ -550,18 +508,6 @@ namespace BetterJunimos {
                 val => Config.FunChanges.MoreColorfulLeafUmbrellas = val,
                 "cfg.more-colorful-umbrellas",
                 "cfg.more-colorful-umbrellas.tooltip"
-            );
-            AddKeybind(
-                () => Config.Other.HutMenuKeybind,
-                val => Config.Other.HutMenuKeybind = val,
-                "cfg.hut-menu-keybind",
-                "cfg.hut-menu-keybind.tooltip"
-            );
-            AddHostBoolOption(
-                () => Config.Other.HutClickEnabled,
-                val => Config.Other.HutClickEnabled = val,
-                "cfg.hut-click-enabled",
-                "cfg.hut-click-enabled.tooltip"
             );
             AddBoolOption(
                 () => Config.Other.ReceiveMessages,
@@ -589,20 +535,20 @@ namespace BetterJunimos {
             configMenu.AddNumberOption(ModManifest, getValue, setValue, () => Helper.Translation.Get(translationKey), () => "", min, max);
         }
 
-        private void AddKeybind(Func<SButton> getValue, Action<SButton> setValue, string translationKey, string tooltipKey = null) {
-            configMenu.AddKeybind(ModManifest, getValue, setValue, () => Helper.Translation.Get(translationKey),
-                () => tooltipKey != null ? Helper.Translation.Get(tooltipKey) : "");
-        }
-
         // save config.json and invalidate caches
         internal static void SaveConfig() {
             Config.JunimoHuts.MaxJunimos = Math.Clamp(Config.JunimoHuts.MaxJunimos, 1, 12);
             Config.JunimoHuts.MaxRadius = Math.Clamp(Config.JunimoHuts.MaxRadius, 1, 20);
+            Config.JunimoAbilities["VisitGreenhouse"] = Config.JunimoImprovements.CanWorkInGreenhouse;
             SHelper.WriteConfig(Config);
             SHelper.GameContent.InvalidateCache("Characters/Junimo");
             SHelper.GameContent.InvalidateCache($"Characters/Junimo.{SHelper.Translation.Locale}");
             SHelper.GameContent.InvalidateCache("Data/Buildings");
             SHelper.GameContent.InvalidateCache($"Data/Buildings.{SHelper.Translation.Locale}");
+            if (Context.IsWorldReady) {
+                JunimoAbilities.ResetCooldowns();
+                PatchSearchAroundHut.InvalidateCache();
+            }
         }
 
         private static void AllowJunimoHutPurchasing() {
@@ -617,11 +563,6 @@ namespace BetterJunimos {
             if (Util.Payments.ReceivePaymentItems(hut)) {
                 Util.Payments.WereJunimosPaidToday = true;
             }
-        }
-
-        private static void CheckForProgressionItems(JunimoHut hut) {
-            if (!Config.Progression.Enabled) return;
-            Util.Progression.ReceiveProgressionItems(hut);
         }
 
         public override object GetApi() {

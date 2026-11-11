@@ -1,9 +1,17 @@
 using System.Collections.Generic;
-using StardewModdingAPI;
 
 namespace BetterJunimos {
     internal class ModConfig {
-        public Dictionary<string, bool> JunimoAbilities { get; set; } = new();
+        public Dictionary<string, bool> JunimoAbilities { get; set; } = new() {
+            ["HarvestCrops"] = true,
+            ["PlantCrops"] = true,
+            ["Fertilize"] = true,
+            ["Water"] = true,
+            ["ClearDeadCrops"] = true,
+            ["HarvestBushes"] = true,
+            ["HarvestForageCrops"] = true,
+            ["VisitGreenhouse"] = true
+        };
 
         public HutSettings JunimoHuts { get; set; } = new();
 
@@ -59,14 +67,6 @@ namespace BetterJunimos {
 
         internal class OtherSettings {
             public bool ReceiveMessages { get; set; } = true;
-            public bool HutClickEnabled { get; set; } = true;
-            public SButton HutMenuKeybind { get; set; } = SButton.None;
-        }
-
-        public JunimoProgression Progression { get; set; } = new();
-
-        internal class JunimoProgression {
-            public bool Enabled { get; set; } = false;
         }
     }
 }
