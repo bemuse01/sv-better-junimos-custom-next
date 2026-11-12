@@ -38,8 +38,6 @@
   "cfg.plant-mixed-seeds.tooltip": "주니모가 모둠 씨앗(Mixed Seeds)과 모둠 꽃씨(Mixed Flower Seeds)를 심을 수 있도록 허용합니다.",
 
   "cfg.other": "기타 외형 및 알림 설정",
-  "cfg.rainy-spirit-factor": "비 오는 날 주니모 투명도",
-  "cfg.rainy-spirit-factor.tooltip": "비 오는 날 주니모의 반투명 정도(영혼 계수)를 조절합니다.",
   "cfg.always-have-umbrellas": "나뭇잎 우산 항상 착용",
   "cfg.always-have-umbrellas.tooltip": "비가 오지 않는 날에도 주니모들이 항상 나뭇잎 우산을 쓰고 다닙니다.",
   "cfg.more-colorful-umbrellas": "다채로운 색상의 나뭇잎 우산",

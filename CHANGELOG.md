@@ -10,10 +10,14 @@
 * **모둠 씨앗(`PlantMixedSeeds`) 및 계절 외 파종 방지(`AvoidPlantingOutOfSeason`) 최적화**:
   * 씨앗 계절 확인 시 `new Crop()` 객체를 생성하고 이중 딕셔너리(`cropSeasons`)를 쓰던 레거시 코드를 바닐라 1.6 정적 메서드 `Crop.IsInSeason(location, resolvedSeedId)` 직접 조회로 교체하고, 불필요한 가을 25일 해바라기 예외 하드코딩을 제거했습니다.
   * `Crop.ResolveSeedId`를 통해 모둠 씨앗/모둠 꽃씨의 현재 계절 유효성을 정확히 판정하도록 보완하고, `PlantMixedSeeds`가 꺼져 있을 때 상자에 모둠 씨앗이나 차나무 묘목만 있는 경우 빈 땅 헛스캔을 하지 않도록 최적화했습니다.
+* **주니모 우산·털모자 스프라이트 패치(`JunimoEditor`) 및 설정 저장 최적화**:
+  * 우산이나 겨울 털모자 오버레이가 실제로 필요한 조건에서만 텍스처 편집(`e.Edit`)을 수행하도록 개선하고, 매일 아침(`OnDayStarted`)과 밤(`OnSaving`)마다 `config.json` 파일을 디스크에 반복해서 덮어쓰던 불필요한 디스크 I/O를 제거했습니다.
 
 ### Removed
 * **실험적 기능인 온실 작업(`CanWorkInGreenhouse` / `VisitGreenhouse`) 및 관련 옵션 제거**:
   * 온실 외벽 타일에 부딪혀 주니모를 소멸·재소환하던 불안정한 편법 구현으로 인해 농장 작물보다 온실 외벽이 가까울 때 주니모 동선이 꼬이고 매 스캔마다 온실 맵을 추가 순회하던 문제를 없애기 위해, `온실에서 작업 가능`(`CanWorkInGreenhouse`) 옵션과 `VisitGreenhouseAbility`, `JunimoGreenhouse`를 전면 제거했습니다.
+* **비 오는 날 주니모 투명도(`RainyJunimoSpiritFactor`) 옵션 제거**:
+  * 이미 비 오는 날에는 나뭇잎 우산 스프라이트가 적용됨에도 주니모를 반투명(`0.65`)하게 만들어 흐릿하게 보이게 하거나 `0.0` 설정 시 주니모 업데이트를 멈추게 하던 `RainyJunimoSpiritFactor` 옵션을 제거했습니다.
 
 ---
 

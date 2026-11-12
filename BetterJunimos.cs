@@ -129,7 +129,6 @@ namespace BetterJunimos {
         private void OnSaving(object sender, SavingEventArgs e) {
             if (!Context.IsMainPlayer) return;
             Helper.Data.WriteSaveData(ModDataKeys.CropMapsSaveKey, CropMaps);
-            SaveConfig();
         }
 
         /// <summary>Raised after a game menu is opened, closed, or replaced.</summary>
@@ -193,8 +192,8 @@ namespace BetterJunimos {
                 }
             }
 
-            // reset for rainy days, winter, or Generic Mod Config Menu options change
-            SaveConfig();
+            // Refresh Junimo sprite cache for today's weather/season (umbrella in rain, beanie in winter)
+            InvalidateJunimoSpriteCache();
         }
 
         private static void RefreshHutsAndRaisins(bool showRaisinMessage) {
@@ -399,14 +398,6 @@ namespace BetterJunimos {
             configMenu.AddSectionTitle(ModManifest,
                 () => Helper.Translation.Get("cfg.other"),
                 () => "");
-            configMenu.AddNumberOption(ModManifest,
-                () => Config.FunChanges.RainyJunimoSpiritFactor,
-                val => Config.FunChanges.RainyJunimoSpiritFactor = val,
-                () => Helper.Translation.Get("cfg.rainy-spirit-factor"),
-                () => Helper.Translation.Get("cfg.rainy-spirit-factor.tooltip"),
-                0.0f,
-                1.0f,
-                0.05f);
             AddBoolOption(
                 () => Config.FunChanges.JunimosAlwaysHaveLeafUmbrellas,
                 val => Config.FunChanges.JunimosAlwaysHaveLeafUmbrellas = val,
@@ -445,14 +436,18 @@ namespace BetterJunimos {
             configMenu.AddNumberOption(ModManifest, getValue, setValue, () => Helper.Translation.Get(translationKey), () => "", min, max);
         }
 
+        internal static void InvalidateJunimoSpriteCache() {
+            SHelper.GameContent.InvalidateCache("Characters/Junimo");
+            SHelper.GameContent.InvalidateCache($"Characters/Junimo.{SHelper.Translation.Locale}");
+        }
+
         // save config.json and invalidate caches
         internal static void SaveConfig() {
             Config.JunimoHuts.MaxJunimos = Math.Clamp(Config.JunimoHuts.MaxJunimos, 1, 12);
             Config.JunimoHuts.MaxRadius = Math.Clamp(Config.JunimoHuts.MaxRadius, 1, 20);
             Config.JunimoAbilities.Remove("VisitGreenhouse");
             SHelper.WriteConfig(Config);
-            SHelper.GameContent.InvalidateCache("Characters/Junimo");
-            SHelper.GameContent.InvalidateCache($"Characters/Junimo.{SHelper.Translation.Locale}");
+            InvalidateJunimoSpriteCache();
             if (Context.IsWorldReady) {
                 JunimoAbilities.ResetCooldowns();
                 PatchSearchAroundHut.InvalidateCache();

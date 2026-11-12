@@ -37,7 +37,6 @@ namespace BetterJunimos {
         public FunSettings FunChanges { get; set; } = new();
 
         internal class FunSettings {
-            public float RainyJunimoSpiritFactor = 0.65f;
             public bool JunimosAlwaysHaveLeafUmbrellas { get; set; } = false;
             public bool MoreColorfulLeafUmbrellas { get; set; } = false;
         }

@@ -338,11 +338,6 @@ namespace BetterJunimos.Utils {
             // Immediately direct the newly spawned Junimo to its closest unclaimed work tile (or back home if none)
             junimoHarvester.pathfindToNewCrop();
 
-            if (Game1.isRaining) {
-                var alpha = Reflection.GetField<float>(junimoHarvester, "alpha");
-                alpha.SetValue(BetterJunimos.Config.FunChanges.RainyJunimoSpiritFactor);
-            }
-
             if (!Utility.isOnScreen(Utility.Vector2ToPoint(pos), 64, location)) return;
             location.playSound("junimoMeep1");
         }
