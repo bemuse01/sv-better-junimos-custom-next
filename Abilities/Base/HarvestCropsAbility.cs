@@ -9,8 +9,8 @@ using StardewModdingAPI;
 
 namespace BetterJunimos.Abilities {
     public class HarvestCropsAbility : IJunimoAbility {
-        // Pumpkin, Cauliflower, Melon, Powdermelon
-        private static readonly HashSet<string> GiantCrops = new() { "190", "254", "276", "889", "PowdermelonSeeds" };
+        // Cauliflower ("190"), Melon ("254"), Pumpkin ("276"), Qi Fruit ("889"), Powdermelon ("Powdermelon")
+        private static readonly HashSet<string> GiantCrops = new() { "190", "254", "276", "889", "Powdermelon" };
         private const string SunflowerId = "421";
 
         internal HarvestCropsAbility() { }
@@ -23,7 +23,7 @@ namespace BetterJunimos.Abilities {
             if (!location.terrainFeatures.ContainsKey(pos) || location.terrainFeatures[pos] is not HoeDirt hd) return false;
             if (hd.crop is null) return false;
             if (!hd.readyForHarvest()) return false;
-            return !ShouldAvoidHarvesting(pos, hd);
+            return !ShouldAvoidHarvesting(location, hd);
         }
 
         public bool PerformAction(GameLocation location, Vector2 pos, JunimoHarvester junimo, Guid guid) {
@@ -50,30 +50,47 @@ namespace BetterJunimos.Abilities {
             return EmptyItems;
         }
 
-        private bool ShouldAvoidHarvesting(Vector2 pos, HoeDirt hd) {
+        private bool ShouldAvoidHarvesting(GameLocation location, HoeDirt hd) {
             string harvestId = hd.crop.indexOfHarvest.Value;
             if (string.IsNullOrEmpty(harvestId)) return false;
 
-            // TODO: check properly if the crop will die tomorrow instead of special-casing 
+            bool avoidGiants = BetterJunimos.Config.JunimoImprovements.AvoidHarvestingGiants && GiantCrops.Contains(harvestId);
+            bool avoidFlowers = BetterJunimos.Config.JunimoImprovements.AvoidHarvestingFlowers &&
+                                Game1.objectData.TryGetValue(harvestId, out var objData) &&
+                                objData.Category == StardewValley.Object.flowersCategory;
+
+            if (!avoidGiants && !avoidFlowers) {
+                return false;
+            }
+
+            if (Game1.dayOfMonth >= 28 && BetterJunimos.Config.JunimoImprovements.HarvestEverythingOn28th && !location.SeedsIgnoreSeasonsHere()) {
+                if (WillCropDieTomorrow(location, hd.crop, harvestId)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool WillCropDieTomorrow(GameLocation location, Crop crop, string harvestId) {
+            Season currentSeason = location.GetSeason();
+            Season nextSeason = currentSeason switch {
+                Season.Spring => Season.Summer,
+                Season.Summer => Season.Fall,
+                Season.Fall => Season.Winter,
+                _ => Season.Spring
+            };
+
+            var cropData = crop.GetData();
+            if (cropData?.Seasons is { Count: > 0 } seasons) {
+                return !seasons.Contains(nextSeason);
+            }
+
             if (harvestId == SunflowerId) {
-                // if it's the last day of Fall, harvest sunflowers
-                if (Game1.IsFall && Game1.dayOfMonth >= 28 && BetterJunimos.Config.JunimoImprovements.HarvestEverythingOn28th) return false;
-            } else {
-                // if it's the last day of the month, harvest whatever it is
-                if (Game1.dayOfMonth >= 28 && BetterJunimos.Config.JunimoImprovements.HarvestEverythingOn28th) return false;
+                return currentSeason == Season.Fall;
             }
 
-            if (BetterJunimos.Config.JunimoImprovements.AvoidHarvestingGiants && GiantCrops.Contains(harvestId)) {
-                return true;
-            }
-
-            if (BetterJunimos.Config.JunimoImprovements.AvoidHarvestingFlowers &&
-                Game1.objectData.TryGetValue(harvestId, out var objData) &&
-                objData.Category == StardewValley.Object.flowersCategory) {
-                return true;
-            }
-
-            return false;
+            return true;
         }
     }
 }

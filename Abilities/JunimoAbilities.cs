@@ -202,6 +202,7 @@ namespace BetterJunimos.Utils {
             string seedsCategory = SObject.SeedsCategory.ToString();
             string fertilizerCategory = SObject.fertilizerCategory.ToString();
             bool avoidCoffee = BetterJunimos.Config.JunimoImprovements.AvoidPlantingCoffee;
+            bool plantMixedSeeds = BetterJunimos.Config.JunimoImprovements.PlantMixedSeeds;
             bool found = false;
 
             foreach (var item in chest.Items) {
@@ -211,7 +212,11 @@ namespace BetterJunimos.Utils {
                     isMatch = item.ItemId == coffeeItemId;
                 }
                 if (!isMatch) continue;
-                if (avoidCoffee && item.ItemId == coffeeItemId) continue;
+                if (itemCategory == seedsCategory) {
+                    if (avoidCoffee && item.ItemId == coffeeItemId) continue;
+                    if (item.ItemId == "251") continue; // Tea Sapling is a bush, not a crop seed
+                    if (!plantMixedSeeds && item.ItemId is "770" or "MixedFlowerSeeds") continue;
+                }
                 if (itemCategory == fertilizerCategory && item.ItemId == "805") continue;
 
                 found = true;

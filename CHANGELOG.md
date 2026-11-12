@@ -2,6 +2,14 @@
 
 ## [1.0.9] - 2026-11-12
 
+### Fixed
+* **거대작물 수확 방지(`AvoidHarvestingGiants`) 파우더멜론 누락 버그 수정**:
+  * 원본 모드에서 파우더멜론의 수확물 ID(`"Powdermelon"`) 대신 씨앗 ID(`"PowdermelonSeeds"`)가 잘못 등록되어 겨울에 파우더멜론이 거대작물이 되기 전에 수확되던 버그를 수정했습니다.
+* **28일 전체 수확(`HarvestEverythingOn28th`) 다계절 작물 판정 개선**:
+  * 해바라기만 하드코딩으로 예외 처리하던 방식을 개선하여, `Data/Crops`의 계절 데이터(`Seasons`)를 기반으로 다음 계절에도 살아남는 연작·다계절 작물은 28일에 강제 수확하지 않고 다음 날 실제로 시드는 작물만 수확하도록 정교화했습니다.
+* **모둠 씨앗(`PlantMixedSeeds`) 계절 확인 및 상자 스캔 최적화**:
+  * `Crop.ResolveSeedId`를 통해 모둠 씨앗/모둠 꽃씨의 현재 계절 유효성을 정확히 판정하도록 보완하고, `PlantMixedSeeds`가 꺼져 있을 때 상자에 모둠 씨앗이나 차나무 묘목만 있는 경우 빈 땅 헛스캔을 하지 않도록 최적화했습니다.
+
 ### Removed
 * **실험적 기능인 온실 작업(`CanWorkInGreenhouse` / `VisitGreenhouse`) 및 관련 옵션 제거**:
   * 온실 외벽 타일에 부딪혀 주니모를 소멸·재소환하던 불안정한 편법 구현으로 인해 농장 작물보다 온실 외벽이 가까울 때 주니모 동선이 꼬이고 매 스캔마다 온실 맵을 추가 순회하던 문제를 없애기 위해, `온실에서 작업 가능`(`CanWorkInGreenhouse`) 옵션과 `VisitGreenhouseAbility`, `JunimoGreenhouse`를 전면 제거했습니다.

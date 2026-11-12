@@ -78,6 +78,9 @@ namespace BetterJunimos.Abilities {
                 if (cropType == CropTypes.Trellis && !IsTrellisCrop(item, location)) continue;
                 if (cropType == CropTypes.Ground && IsTrellisCrop(item, location)) continue;
 
+                string resolvedSeedId = Crop.ResolveSeedId(item.ItemId, location);
+                if (!Game1.cropData.ContainsKey(resolvedSeedId)) continue;
+
                 if (!avoidOutOfSeason) {
                     return item;
                 }
@@ -87,16 +90,15 @@ namespace BetterJunimos.Abilities {
                     continue;
                 }
 
-                var key = item.ItemId;
                 if (!cropSeasons.TryGetValue(Game1.currentSeason, out var seasonDict)) {
                     seasonDict = new Dictionary<string, bool>();
                     cropSeasons[Game1.currentSeason] = seasonDict;
                 }
 
-                if (!seasonDict.TryGetValue(key, out bool inSeason)) {
-                    var crop = new Crop(key, 0, 0, location);
+                if (!seasonDict.TryGetValue(resolvedSeedId, out bool inSeason)) {
+                    var crop = new Crop(resolvedSeedId, 0, 0, location);
                     inSeason = crop.IsInSeason(location);
-                    seasonDict[key] = inSeason;
+                    seasonDict[resolvedSeedId] = inSeason;
                 }
 
                 if (inSeason) {
@@ -150,7 +152,10 @@ namespace BetterJunimos.Abilities {
         }
 
         private bool Plant(GameLocation location, Vector2 pos, string index) {
-            Crop crop = new Crop(index, (int)pos.X, (int)pos.Y, location);
+            string resolvedIndex = Crop.ResolveSeedId(index, location);
+            if (!Game1.cropData.ContainsKey(resolvedIndex)) return false;
+
+            Crop crop = new Crop(resolvedIndex, (int)pos.X, (int)pos.Y, location);
 
             if (!crop.IsInSeason(location) && BetterJunimos.Config.JunimoImprovements.AvoidPlantingOutOfSeason) {
                 Monitor.Log($"Crop {crop} ({index}) cannot be planted in {Game1.currentSeason}", LogLevel.Warn);
