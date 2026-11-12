@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.9] - 2026-11-12
+
+### Removed
+* **실험적 기능인 온실 작업(`CanWorkInGreenhouse` / `VisitGreenhouse`) 및 관련 옵션 제거**:
+  * 온실 외벽 타일에 부딪혀 주니모를 소멸·재소환하던 불안정한 편법 구현으로 인해 농장 작물보다 온실 외벽이 가까울 때 주니모 동선이 꼬이고 매 스캔마다 온실 맵을 추가 순회하던 문제를 없애기 위해, `온실에서 작업 가능`(`CanWorkInGreenhouse`) 옵션과 `VisitGreenhouseAbility`, `JunimoGreenhouse`를 전면 제거했습니다.
+
+---
+
 ## [1.0.8] - 2026-11-12
 
 ### Removed

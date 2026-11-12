@@ -23,7 +23,7 @@ namespace BetterJunimos.Patches {
         public static bool Prefix(JunimoHarvester __instance, ref PathNode currentNode, ref NetGuid ___netHome, ref bool __result) {
             var hut = Util.GetHutFromId(___netHome.Value);
             var radius = Util.CurrentWorkingRadius;
-            if (hut != null && !__instance.currentLocation.IsGreenhouse && !Util.IsWithinHutRadius(hut, currentNode.x, currentNode.y, radius)) {
+            if (hut != null && !Util.IsWithinHutRadius(hut, currentNode.x, currentNode.y, radius)) {
                 __result = false;
                 return false;
             }
@@ -56,7 +56,7 @@ namespace BetterJunimos.Patches {
             var pos = __instance.Tile;
             var radius = Util.CurrentWorkingRadius;
 
-            if (!__instance.currentLocation.IsGreenhouse && !Util.IsWithinHutRadius(hut, pos, radius)) {
+            if (!Util.IsWithinHutRadius(hut, pos, radius)) {
                 ___harvestTimer = 0;
                 Util.ClearTarget(__instance);
                 __instance.pathfindToNewCrop();
@@ -166,21 +166,13 @@ namespace BetterJunimos.Patches {
             var radius = Util.CurrentWorkingRadius;
             var retry = 0;
             do {
-                var endPoint = __instance.currentLocation.IsGreenhouse
-                    ? EndPointInGreenhouse(__instance)
-                    : EndPointInFarm(__instance.currentLocation, hut, radius);
+                var endPoint = EndPointInFarm(__instance.currentLocation, hut, radius);
 
                 __instance.controller = new PathFindController(__instance, __instance.currentLocation, endPoint, -1, __instance.reachFirstDestinationFromHut, 1000);
                 retry++;
             } while (retry <= 5 && __instance.controller?.pathToEndPoint == null);
 
             return false;
-        }
-
-        private static Point EndPointInGreenhouse(JunimoHarvester jh) {
-            var gw = jh.currentLocation.map.Layers[0].LayerWidth;
-            var gh = jh.currentLocation.map.Layers[0].LayerHeight;
-            return new Vector2(gw / 2 + Game1.random.Next(-(gw / 2 + 2), gh / 2 - 2), gh / 2 + Game1.random.Next(-(gw / 2 + 2), gh / 2 - 2)).ToPoint();
         }
 
         private static Point EndPointInFarm(GameLocation location, JunimoHut hut, int radius) {
@@ -251,43 +243,9 @@ namespace BetterJunimos.Patches {
             Util.ClearTarget(junimo);
             if (junimo.currentLocation.NameOrUniqueName == hut.GetParentLocation().NameOrUniqueName) {
                 junimo.returnToJunimoHut(junimo.currentLocation);
-            } else if (junimo.currentLocation.IsGreenhouse) {
-                returnToGreenhouseDoor(junimo, junimo.currentLocation);
             } else {
                 junimo.junimoReachedHut(junimo, junimo.currentLocation);
             }
-        }
-
-        private static void returnToGreenhouseDoor(JunimoHarvester junimo, GameLocation location) {
-            if (Utility.isOnScreen(Utility.Vector2ToPoint(junimo.position.Value / 64f), 64, junimo.currentLocation)) junimo.jump();
-            junimo.collidesWithOtherCharacters.Value = false;
-
-            if (Game1.IsMasterGame) {
-                var door = GreenhouseDoor(junimo, location);
-                if (door == Point.Zero) {
-                    junimo.junimoReachedHut(junimo, junimo.currentLocation);
-                    return;
-                }
-
-                junimo.controller = new PathFindController(junimo, location, door, 1, junimo.junimoReachedHut);
-                if (junimo.controller.pathToEndPoint == null || junimo.controller.pathToEndPoint.Count == 0) {
-                    junimo.junimoReachedHut(junimo, junimo.currentLocation);
-                    return;
-                }
-            }
-
-            if (!Utility.isOnScreen(Utility.Vector2ToPoint(junimo.position.Value / 64f), 64, junimo.currentLocation)) return;
-            location.playSound("junimoMeep1");
-        }
-
-        public static Point GreenhouseDoor(JunimoHarvester junimo, GameLocation location) {
-            //TryFind warp to hutlocation
-            var warp = location.warps.FirstOrDefault(warp => warp.TargetName == junimo.home.GetParentLocation().NameOrUniqueName);
-            if (warp != null) {
-                return new Point(warp.X, warp.Y - 1);
-            }
-
-            return Point.Zero;
         }
     }
 
@@ -318,8 +276,7 @@ namespace BetterJunimos.Patches {
                     var id = __instance.HomeId;
                     var pos = __instance.Tile;
                     var radius = Util.CurrentWorkingRadius;
-                    bool inBounds = __instance.currentLocation.IsGreenhouse || Util.IsWithinHutRadius(hut, pos, radius);
-                    if (inBounds &&
+                    if (Util.IsWithinHutRadius(hut, pos, radius) &&
                         !Util.IsTileClaimedByOtherJunimo(__instance.currentLocation, (int)pos.X, (int)pos.Y, __instance) &&
                         Util.Abilities.IdentifyJunimoAbility(__instance.currentLocation, pos, id) != null) {
                         __instance.tryToHarvestHere();

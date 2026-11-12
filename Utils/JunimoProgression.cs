@@ -70,28 +70,6 @@ namespace BetterJunimos.Utils {
                     _monitor.Log($"    {farm.Name} [{pos.X} {pos.Y}] {ability.AbilityName()} {cooldown} {itemsAvail}", LogLevel.Debug);
                 }
             }
-
-            if (!Util.Greenhouse.HutHasGreenhouse(id)) {
-                return;
-            }
-
-            _monitor.Log($"{Get("debug.available-actions-for-greenhouse")}:", LogLevel.Debug);
-
-            var gh = Game1.getLocationFromName("Greenhouse");
-            for (var x = 0; x < gh.map.Layers[0].LayerWidth; x++) {
-                for (var y = 0; y < gh.map.Layers[0].LayerHeight; y++) {
-                    var pos = new Vector2(x, y);
-                    var ability = Util.Abilities.IdentifyJunimoAbility(gh, pos, id);
-                    if (ability == null) {
-                        continue;
-                    }
-
-                    var cooldown = JunimoAbilities.ActionCoolingDown(gh, ability, pos) ? Get("debug.in-cooldown") : "";
-                    var itemsAvail = JunimoAbilities.ItemInHut(id, ability.RequiredItems()) ? "" : Get("debug.required-item-unavailable");
-
-                    _monitor.Log($"    {gh.Name} [{pos.X} {pos.Y}] {ability.AbilityName()} {cooldown} {itemsAvail}", LogLevel.Debug);
-                }
-            }
         }
 
         private string Get(string key) {

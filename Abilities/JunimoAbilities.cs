@@ -32,16 +32,6 @@ namespace BetterJunimos.Utils {
          */
         private static readonly Dictionary<(GameLocation, Vector2, IJunimoAbility), int> FailureCooldowns = new();
 
-
-        /*
-         * for each hut and map, the last known crop location/work to do
-         * because each hut could be servicing several locations (e.g. farm, greenhouse)
-         *
-         * used in pathFindToNewCrop_doWork
-         */
-        internal readonly Dictionary<(JunimoHut, GameLocation), Point> lastKnownCropLocations = new();
-
-
         private readonly List<IJunimoAbility> _registeredJunimoAbilities = new();
 
         private static readonly Dictionary<Guid, Dictionary<string, bool>> ItemsInHuts = new();
@@ -64,7 +54,6 @@ namespace BetterJunimos.Utils {
                 new FertilizeAbility(),
                 new PlantCropsAbility(_monitor),
                 new WaterAbility(),
-                new VisitGreenhouseAbility(),
             };
             foreach (var junimoAbility in defaultAbilities) {
                 RegisterJunimoAbility(junimoAbility);

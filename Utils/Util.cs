@@ -27,7 +27,6 @@ namespace BetterJunimos.Utils {
         internal static IReflectionHelper Reflection;
         internal static JunimoAbilities Abilities;
         internal static JunimoProgression Progression;
-        internal static JunimoGreenhouse Greenhouse;
 
         // Set of hut ids that we've already warned about, so orphaned junimos (e.g.
         // from a hut that was demolished or a save from an older version) don't spam
@@ -185,7 +184,7 @@ namespace BetterJunimos.Utils {
         }
 
         /// <summary>
-        /// Finds the closest unclaimed, reachable workable tile within the hut's radius (or greenhouse)
+        /// Finds the closest unclaimed, reachable workable tile within the hut's radius
         /// and assigns an A* PathFindController to the Junimo.
         /// </summary>
         public static bool TryAssignWorkPath(JunimoHarvester me, JunimoHut hut, GameLocation location) {
@@ -200,57 +199,45 @@ namespace BetterJunimos.Utils {
             int width = location.map.Layers[0].LayerWidth;
             int height = location.map.Layers[0].LayerHeight;
 
-            if (location.IsGreenhouse) {
-                for (int x = 0; x < width; ++x) {
-                    for (int y = 0; y < height; ++y) {
-                        var pt = new Point(x, y);
-                        if (IsTileUnreachable(location, pt)) continue;
-                        if (Abilities.IdentifyJunimoAbility(location, new Vector2(x, y), id) == null) continue;
-                        if (IsTileClaimedByOtherJunimo(location, x, y, me)) continue;
-                        candidates.Add((pt, 0, 0, 0));
-                    }
+            List<JunimoHut> otherHuts = null;
+            foreach (var building in location.buildings) {
+                if (building is JunimoHut otherHut && !ReferenceEquals(otherHut, hut)) {
+                    otherHuts ??= new List<JunimoHut>();
+                    otherHuts.Add(otherHut);
                 }
-            } else {
-                List<JunimoHut> otherHuts = null;
-                foreach (var building in location.buildings) {
-                    if (building is JunimoHut otherHut && !ReferenceEquals(otherHut, hut)) {
-                        otherHuts ??= new List<JunimoHut>();
-                        otherHuts.Add(otherHut);
-                    }
-                }
+            }
 
-                var (minX, maxX, minY, maxY) = GetHutRadiusBounds(hut, radius);
-                minX = Math.Max(0, minX);
-                minY = Math.Max(0, minY);
-                maxX = Math.Min(width - 1, maxX);
-                maxY = Math.Min(height - 1, maxY);
+            var (minX, maxX, minY, maxY) = GetHutRadiusBounds(hut, radius);
+            minX = Math.Max(0, minX);
+            minY = Math.Max(0, minY);
+            maxX = Math.Min(width - 1, maxX);
+            maxY = Math.Min(height - 1, maxY);
 
-                for (int x = minX; x <= maxX; ++x) {
-                    for (int y = minY; y <= maxY; ++y) {
-                        var pt = new Point(x, y);
-                        if (IsTileUnreachable(location, pt)) continue;
-                        if (Abilities.IdentifyJunimoAbility(location, new Vector2(x, y), id) == null) continue;
-                        if (IsTileClaimedByOtherJunimo(location, x, y, me)) continue;
+            for (int x = minX; x <= maxX; ++x) {
+                for (int y = minY; y <= maxY; ++y) {
+                    var pt = new Point(x, y);
+                    if (IsTileUnreachable(location, pt)) continue;
+                    if (Abilities.IdentifyJunimoAbility(location, new Vector2(x, y), id) == null) continue;
+                    if (IsTileClaimedByOtherJunimo(location, x, y, me)) continue;
 
-                        var (myRadiusDist, myManhattanDist) = GetDistanceFromHut(hut, x, y);
-                        int priority = 0; // 0: Exclusive, 1: Shared but closer to my hut (my plot), 2: Shared and closer to another hut (neighbor's plot)
+                    var (myRadiusDist, myManhattanDist) = GetDistanceFromHut(hut, x, y);
+                    int priority = 0; // 0: Exclusive, 1: Shared but closer to my hut (my plot), 2: Shared and closer to another hut (neighbor's plot)
 
-                        if (otherHuts != null) {
-                            for (int i = 0; i < otherHuts.Count; ++i) {
-                                var (otherRadiusDist, otherManhattanDist) = GetDistanceFromHut(otherHuts[i], x, y);
-                                if (otherRadiusDist <= radius) {
-                                    if (otherRadiusDist < myRadiusDist ||
-                                        (otherRadiusDist == myRadiusDist && otherManhattanDist < myManhattanDist)) {
-                                        priority = 2;
-                                        break;
-                                    }
-                                    priority = 1;
+                    if (otherHuts != null) {
+                        for (int i = 0; i < otherHuts.Count; ++i) {
+                            var (otherRadiusDist, otherManhattanDist) = GetDistanceFromHut(otherHuts[i], x, y);
+                            if (otherRadiusDist <= radius) {
+                                if (otherRadiusDist < myRadiusDist ||
+                                    (otherRadiusDist == myRadiusDist && otherManhattanDist < myManhattanDist)) {
+                                    priority = 2;
+                                    break;
                                 }
+                                priority = 1;
                             }
                         }
-
-                        candidates.Add((pt, priority, myRadiusDist, myManhattanDist));
                     }
+
+                    candidates.Add((pt, priority, myRadiusDist, myManhattanDist));
                 }
             }
 

@@ -68,7 +68,6 @@ namespace BetterJunimos.Abilities {
         /// <summary>Get an item from the chest that is a crop seed, plantable in this season</summary>
         private Item PlantableSeed(GameLocation location, Chest chest, string cropType = null) {
             bool avoidCoffee = BetterJunimos.Config.JunimoImprovements.AvoidPlantingCoffee;
-            bool isGreenhouse = location.IsGreenhouse;
             bool avoidOutOfSeason = BetterJunimos.Config.JunimoImprovements.AvoidPlantingOutOfSeason;
 
             foreach (var item in chest.Items) {
@@ -79,7 +78,7 @@ namespace BetterJunimos.Abilities {
                 if (cropType == CropTypes.Trellis && !IsTrellisCrop(item, location)) continue;
                 if (cropType == CropTypes.Ground && IsTrellisCrop(item, location)) continue;
 
-                if (isGreenhouse || !avoidOutOfSeason) {
+                if (!avoidOutOfSeason) {
                     return item;
                 }
 
@@ -153,7 +152,7 @@ namespace BetterJunimos.Abilities {
         private bool Plant(GameLocation location, Vector2 pos, string index) {
             Crop crop = new Crop(index, (int)pos.X, (int)pos.Y, location);
 
-            if (!location.IsGreenhouse && !crop.IsInSeason(location) && BetterJunimos.Config.JunimoImprovements.AvoidPlantingOutOfSeason) {
+            if (!crop.IsInSeason(location) && BetterJunimos.Config.JunimoImprovements.AvoidPlantingOutOfSeason) {
                 Monitor.Log($"Crop {crop} ({index}) cannot be planted in {Game1.currentSeason}", LogLevel.Warn);
                 return false;
             }

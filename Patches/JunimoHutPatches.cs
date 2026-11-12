@@ -56,61 +56,10 @@ namespace BetterJunimos.Patches {
             // are always recognized without requiring a separate hut click.
             Util.Abilities.UpdateHutItems(id, hut);
 
-            // SearchHutGrid manages hut.lastKnownCropLocation and Util.Abilities.lastKnownCropLocations
             var foundWork = SearchHutGrid(hut, radius, farm, id);
-
-            if (BetterJunimos.Config.JunimoImprovements.CanWorkInGreenhouse) {
-                var ghb = Util.Greenhouse.GreenhouseBuildingNearHut(id);
-                var gh = Game1.getLocationFromName("Greenhouse");
-                if (ghb != null) {
-                    gh = ghb;
-                }
-
-                if (Util.Greenhouse.HutHasGreenhouse(id)) {
-                    // SearchGreenhouseGrid manages hut.lastKnownCropLocation (a hack!) and Util.Abilities.lastKnownCropLocations
-                    foundWork |= SearchGreenhouseGrid(hut, id, gh);
-                }
-            }
 
             _scanCache[hut] = (foundWork, radius, Game1.ticks, hut.tileX.Value, hut.tileY.Value);
             return foundWork;
-        }
-
-        /// <summary>
-        /// Search the Greenhouse for work to do, and update
-        /// hut.lastKnownCropLocation and
-        /// Util.Abilities.lastKnownCropLocations
-        /// with the location of any work found
-        /// </summary>
-        /// <param name="hut">JunimoHut to search</param>
-        /// <param name="hut_guid">GUID of hut to search</param>
-        /// <returns>True if there's any work to do</returns>
-        internal static bool SearchGreenhouseGrid(JunimoHut hut, Guid hut_guid, GameLocation gl = null) {
-            var gh = Game1.getLocationFromName("Greenhouse");
-            if (gl != null) {
-                gh = gl;
-            }
-
-            int width = gh.map.Layers[0].LayerWidth;
-            int height = gh.map.Layers[0].LayerHeight;
-            for (var x = 0; x < width; x++) {
-                for (var y = 0; y < height; y++) {
-                    var pt = new Point(x, y);
-                    if (Util.IsTileUnreachable(gh, pt)) continue;
-
-                    var pos = new Vector2(x, y);
-                    var ability = Util.Abilities.IdentifyJunimoAbility(gh, pos, hut_guid);
-                    if (ability == null) continue;
-                    if (Util.IsTileClaimedByOtherJunimo(gh, x, y)) continue;
-
-                    hut.lastKnownCropLocation = pt;
-                    Util.Abilities.lastKnownCropLocations[(hut, gh)] = pt;
-                    return true;
-                }
-            }
-
-            Util.Abilities.lastKnownCropLocations[(hut, gh)] = Point.Zero;
-            return false;
         }
 
         private static bool SearchHutGrid(JunimoHut hut, int radius, GameLocation farm, Guid id) {
@@ -133,13 +82,11 @@ namespace BetterJunimos.Patches {
                     if (Util.IsTileClaimedByOtherJunimo(farm, x, y)) continue;
 
                     hut.lastKnownCropLocation = pt;
-                    Util.Abilities.lastKnownCropLocations[(hut, farm)] = pt;
                     return true;
                 }
             }
 
             hut.lastKnownCropLocation = Point.Zero;
-            Util.Abilities.lastKnownCropLocations[(hut, farm)] = Point.Zero;
             return false;
         }
     }
@@ -306,21 +253,7 @@ namespace BetterJunimos.Patches {
                 }
             }
 
-            // make sure junimos working in a greenhouse are still accounted for
-            foreach (var loc in Game1.locations) {
-                if (!loc.IsGreenhouse) continue;
-                foreach (var npc in loc.characters) {
-                    if (npc is JunimoHarvester jh && jh.home == __instance) {
-                        if (!__instance.myJunimos.Contains(jh)) {
-                            __instance.myJunimos.Add(jh);
-                            jh.pokeToHarvest();
-                        }
-                    }
-                }
-            }
-
-            // send the junimos back to work (vanilla already pokes the ones in this
-            // hut's location; this also covers greenhouse junimos it couldn't see)
+            // send the junimos back to work
             for (var index = __instance.myJunimos.Count - 1; index >= 0; --index) {
                 __instance.myJunimos[index].pokeToHarvest();
             }

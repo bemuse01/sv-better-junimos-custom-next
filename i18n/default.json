@@ -7,8 +7,6 @@
   "cfg.can-work-in-rain": "Can Work In Rain",
   "cfg.can-work-in-winter": "Can Work In Winter",
   "cfg.can-work-in-evenings": "Can Work In Evenings",
-  "cfg.can-work-in-greenhouse": "Can Work In Greenhouse",
-  "cfg.can-work-in-greenhouse.tooltip": "Allow Junimos to work inside a Greenhouse located within the hut's search radius",
   "cfg.ability.harvest-crops": "Harvest Crops",
   "cfg.ability.harvest-crops.tooltip": "Allow Junimos to harvest mature crops",
   "cfg.ability.plant-crops": "Plant Crops",
@@ -44,7 +42,6 @@
   "cfg.more-colorful-umbrellas.tooltip": "More Colorful Leaf Umbrellas",
   "cfg.receive-messages": "Receive messages",
   "debug.available-actions-for-hut-at": "Available actions for hut at",
-  "debug.available-actions-for-greenhouse": "Available actions for greenhouse",
   "debug.actions-logged": "Available actions logged to the console",
   "debug.in-cooldown": "[cooling down]",
   "debug.required-item-unavailable": "[required item unavailable]"

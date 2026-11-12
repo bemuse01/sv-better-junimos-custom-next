@@ -9,8 +9,7 @@ namespace BetterJunimos {
             ["Water"] = true,
             ["ClearDeadCrops"] = true,
             ["HarvestBushes"] = true,
-            ["HarvestForageCrops"] = true,
-            ["VisitGreenhouse"] = true
+            ["HarvestForageCrops"] = true
         };
 
         public HutSettings JunimoHuts { get; set; } = new();
@@ -26,7 +25,6 @@ namespace BetterJunimos {
             public bool CanWorkInRain { get; set; } = true;
             public bool CanWorkInWinter { get; set; } = true;
             public bool CanWorkInEvenings { get; set; } = true;
-            public bool CanWorkInGreenhouse { get; set; } = true;
             public bool GiveExperience { get; set; } = false;
             public bool AvoidHarvestingFlowers { get; set; } = true;
             public bool AvoidHarvestingGiants { get; set; } = true;

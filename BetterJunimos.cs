@@ -35,7 +35,6 @@ namespace BetterJunimos {
 
             Util.Abilities = new JunimoAbilities(Config.JunimoAbilities, Monitor);
             Util.Progression = new JunimoProgression(ModManifest, Monitor, Helper);
-            Util.Greenhouse = new JunimoGreenhouse(ModManifest, Monitor, Helper);
 
             helper.Events.Content.AssetRequested += JunimoEditor.OnAssetRequested;
 
@@ -309,15 +308,6 @@ namespace BetterJunimos {
                 "cfg.can-work-in-evenings"
             );
             AddHostBoolOption(
-                () => Config.JunimoImprovements.CanWorkInGreenhouse,
-                val => {
-                    Config.JunimoImprovements.CanWorkInGreenhouse = val;
-                    SetAbilityEnabled("VisitGreenhouse", val);
-                },
-                "cfg.can-work-in-greenhouse",
-                "cfg.can-work-in-greenhouse.tooltip"
-            );
-            AddHostBoolOption(
                 () => GetAbilityEnabled("HarvestCrops"),
                 val => SetAbilityEnabled("HarvestCrops", val),
                 "cfg.ability.harvest-crops",
@@ -459,7 +449,7 @@ namespace BetterJunimos {
         internal static void SaveConfig() {
             Config.JunimoHuts.MaxJunimos = Math.Clamp(Config.JunimoHuts.MaxJunimos, 1, 12);
             Config.JunimoHuts.MaxRadius = Math.Clamp(Config.JunimoHuts.MaxRadius, 1, 20);
-            Config.JunimoAbilities["VisitGreenhouse"] = Config.JunimoImprovements.CanWorkInGreenhouse;
+            Config.JunimoAbilities.Remove("VisitGreenhouse");
             SHelper.WriteConfig(Config);
             SHelper.GameContent.InvalidateCache("Characters/Junimo");
             SHelper.GameContent.InvalidateCache($"Characters/Junimo.{SHelper.Translation.Locale}");

@@ -9,8 +9,6 @@
   "cfg.can-work-in-rain": "비 오는 날 작업 가능",
   "cfg.can-work-in-winter": "겨울에 작업 가능",
   "cfg.can-work-in-evenings": "저녁(야간)에 작업 가능",
-  "cfg.can-work-in-greenhouse": "온실에서 작업 가능",
-  "cfg.can-work-in-greenhouse.tooltip": "오두막 탐색 반경 내에 온실이 있을 경우 주니모가 온실에 들어가 작업할 수 있습니다.",
   "cfg.ability.harvest-crops": "일반 작물 수확",
   "cfg.ability.harvest-crops.tooltip": "다 자란 농작물을 주니모가 수확합니다.",
   "cfg.ability.plant-crops": "씨앗 파종",
@@ -49,7 +47,6 @@
   "cfg.receive-messages": "알림 메시지 표시",
 
   "debug.available-actions-for-hut-at": "오두막에서 사용 가능한 작업 위치:",
-  "debug.available-actions-for-greenhouse": "온실에서 사용 가능한 작업:",
   "debug.actions-logged": "사용 가능한 작업이 콘솔에 기록되었습니다.",
   "debug.in-cooldown": "[대기 시간 중]",
   "debug.required-item-unavailable": "[필요한 아이템 없음]"
