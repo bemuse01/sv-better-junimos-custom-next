@@ -15,18 +15,12 @@ namespace BetterJunimos.Abilities {
     public class PlantCropsAbility : IJunimoAbility {
         private readonly IMonitor Monitor;
 
-        private const string SunflowerSeeds = "431";
         private const string TeaSapling = "251";
-        static Dictionary<string, Dictionary<string, bool>> cropSeasons = new();
         private static readonly Dictionary<string, bool> IsTrellisCache = new();
         private static readonly Dictionary<string, bool> IsCropSeedCache = new();
 
         internal PlantCropsAbility(IMonitor Monitor) {
             this.Monitor = Monitor;
-            var seasons = new List<string> { "spring", "summer", "fall", "winter" };
-            foreach (string season in seasons) {
-                cropSeasons[season] = new Dictionary<string, bool>();
-            }
         }
 
         public string AbilityName() {
@@ -81,27 +75,7 @@ namespace BetterJunimos.Abilities {
                 string resolvedSeedId = Crop.ResolveSeedId(item.ItemId, location);
                 if (!Game1.cropData.ContainsKey(resolvedSeedId)) continue;
 
-                if (!avoidOutOfSeason) {
-                    return item;
-                }
-
-                if (item.ItemId == SunflowerSeeds && Game1.IsFall && Game1.dayOfMonth >= 25) {
-                    // there is no way that a sunflower planted on Fall 25 will grow to harvest
-                    continue;
-                }
-
-                if (!cropSeasons.TryGetValue(Game1.currentSeason, out var seasonDict)) {
-                    seasonDict = new Dictionary<string, bool>();
-                    cropSeasons[Game1.currentSeason] = seasonDict;
-                }
-
-                if (!seasonDict.TryGetValue(resolvedSeedId, out bool inSeason)) {
-                    var crop = new Crop(resolvedSeedId, 0, 0, location);
-                    inSeason = crop.IsInSeason(location);
-                    seasonDict[resolvedSeedId] = inSeason;
-                }
-
-                if (inSeason) {
+                if (!avoidOutOfSeason || Crop.IsInSeason(location, resolvedSeedId)) {
                     return item;
                 }
             }

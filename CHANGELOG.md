@@ -7,7 +7,8 @@
   * 원본 모드에서 파우더멜론의 수확물 ID(`"Powdermelon"`) 대신 씨앗 ID(`"PowdermelonSeeds"`)가 잘못 등록되어 겨울에 파우더멜론이 거대작물이 되기 전에 수확되던 버그를 수정했습니다.
 * **28일 전체 수확(`HarvestEverythingOn28th`) 다계절 작물 판정 개선**:
   * 해바라기만 하드코딩으로 예외 처리하던 방식을 개선하여, `Data/Crops`의 계절 데이터(`Seasons`)를 기반으로 다음 계절에도 살아남는 연작·다계절 작물은 28일에 강제 수확하지 않고 다음 날 실제로 시드는 작물만 수확하도록 정교화했습니다.
-* **모둠 씨앗(`PlantMixedSeeds`) 계절 확인 및 상자 스캔 최적화**:
+* **모둠 씨앗(`PlantMixedSeeds`) 및 계절 외 파종 방지(`AvoidPlantingOutOfSeason`) 최적화**:
+  * 씨앗 계절 확인 시 `new Crop()` 객체를 생성하고 이중 딕셔너리(`cropSeasons`)를 쓰던 레거시 코드를 바닐라 1.6 정적 메서드 `Crop.IsInSeason(location, resolvedSeedId)` 직접 조회로 교체하고, 불필요한 가을 25일 해바라기 예외 하드코딩을 제거했습니다.
   * `Crop.ResolveSeedId`를 통해 모둠 씨앗/모둠 꽃씨의 현재 계절 유효성을 정확히 판정하도록 보완하고, `PlantMixedSeeds`가 꺼져 있을 때 상자에 모둠 씨앗이나 차나무 묘목만 있는 경우 빈 땅 헛스캔을 하지 않도록 최적화했습니다.
 
 ### Removed
