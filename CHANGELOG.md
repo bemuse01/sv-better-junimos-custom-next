@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.8] - 2026-11-12
+
+### Removed
+* **오두막 조기 해금 및 건설 비용 변경 옵션 제거**:
+  * 바닐라 밸런스 및 세이브 무결성(마법 잉크 퀘스트 진행) 유지를 위해 `마을 회관 완료 후 건설 가능`(`AvailableAfterCommunityCenterComplete`), `조건 없이 즉시 건설 가능`(`AvailableImmediately`), `오두막 건설 비용 절감`(`ReducedCostToConstruct`), `오두막 무료 건설`(`FreeToConstruct`) 옵션과 `BuildingEditor.cs`를 제거했습니다.
+* **미사용 `[CP] Better Junimos Config Wizard` 디렉토리 저장소에서 완전 삭제**:
+  * Git 저장소에 남아있던 `[CP] Better Junimos Config Wizard` 폴더를 완전히 제거했습니다.
+
+---
+
 ## [1.0.7] - 2026-11-12
 
 ### Fixed

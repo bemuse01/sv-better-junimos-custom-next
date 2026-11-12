@@ -4,11 +4,6 @@
   "cfg.hut-settings": "오두막 설정",
   "cfg.max-junimos": "오두막당 최대 주니모 수",
   "cfg.max-radius": "오두막 최대 탐색 반경",
-  "cfg.avail-after-cc": "마을 회관 완료 후 건설 가능",
-  "cfg.avail-after-cc.tooltip": "마법사의 잉크 퀘스트 전이라도 마을 회관(또는 조자 개발) 완료 즉시 주니모 오두막을 건설할 수 있습니다.",
-  "cfg.avail-immediately": "조건 없이 즉시 건설 가능",
-  "cfg.reduced-cost": "오두막 건설 비용 절감",
-  "cfg.free": "오두막 무료 건설",
 
   "cfg.improvements": "주니모 작업 조건 및 능력",
   "cfg.can-work-in-rain": "비 오는 날 작업 가능",

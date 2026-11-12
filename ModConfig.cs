@@ -18,10 +18,6 @@ namespace BetterJunimos {
         internal class HutSettings {
             public int MaxJunimos { get; set; } = 3;
             public int MaxRadius { get; set; } = 7;
-            public bool AvailableAfterCommunityCenterComplete { get; set; } = true;
-            public bool AvailableImmediately { get; set; } = false;
-            public bool ReducedCostToConstruct { get; set; } = true;
-            public bool FreeToConstruct { get; set; } = false;
         }
 
         public JunimoImprovement JunimoImprovements { get; set; } = new();

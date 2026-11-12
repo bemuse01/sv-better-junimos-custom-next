@@ -37,7 +37,6 @@ namespace BetterJunimos {
             Util.Progression = new JunimoProgression(ModManifest, Monitor, Helper);
             Util.Greenhouse = new JunimoGreenhouse(ModManifest, Monitor, Helper);
 
-            helper.Events.Content.AssetRequested += BuildingEditor.OnAssetRequested;
             helper.Events.Content.AssetRequested += JunimoEditor.OnAssetRequested;
 
             helper.Events.Display.MenuChanged += OnMenuChanged;
@@ -237,8 +236,6 @@ namespace BetterJunimos {
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
         private void OnSaveLoaded(object sender, EventArgs e) {
-            AllowJunimoHutPurchasing();
-
             // rebuild the GMCM menu now we know who's host/farmhand
             SetupGenericModConfigMenu();
 
@@ -289,28 +286,6 @@ namespace BetterJunimos {
                 val => Config.JunimoHuts.MaxRadius = val,
                 "cfg.max-radius",
                 1, 20
-            );
-
-            AddBoolOption(
-                () => Config.JunimoHuts.AvailableAfterCommunityCenterComplete,
-                val => Config.JunimoHuts.AvailableAfterCommunityCenterComplete = val,
-                "cfg.avail-after-cc",
-                "cfg.avail-after-cc.tooltip"
-            );
-            AddBoolOption(
-                () => Config.JunimoHuts.AvailableImmediately,
-                val => Config.JunimoHuts.AvailableImmediately = val,
-                "cfg.avail-immediately"
-            );
-            AddBoolOption(
-                () => Config.JunimoHuts.ReducedCostToConstruct,
-                val => Config.JunimoHuts.ReducedCostToConstruct = val,
-                "cfg.reduced-cost"
-            );
-            AddBoolOption(
-                () => Config.JunimoHuts.FreeToConstruct,
-                val => Config.JunimoHuts.FreeToConstruct = val,
-                "cfg.free"
             );
 
             // 2. Work Conditions & Abilities
@@ -488,17 +463,9 @@ namespace BetterJunimos {
             SHelper.WriteConfig(Config);
             SHelper.GameContent.InvalidateCache("Characters/Junimo");
             SHelper.GameContent.InvalidateCache($"Characters/Junimo.{SHelper.Translation.Locale}");
-            SHelper.GameContent.InvalidateCache("Data/Buildings");
-            SHelper.GameContent.InvalidateCache($"Data/Buildings.{SHelper.Translation.Locale}");
             if (Context.IsWorldReady) {
                 JunimoAbilities.ResetCooldowns();
                 PatchSearchAroundHut.InvalidateCache();
-            }
-        }
-
-        private static void AllowJunimoHutPurchasing() {
-            if (Config.JunimoHuts.AvailableImmediately || (Config.JunimoHuts.AvailableAfterCommunityCenterComplete && Game1.MasterPlayer.mailReceived.Contains("ccIsComplete"))) {
-                Game1.player.hasMagicInk = true;
             }
         }
 
